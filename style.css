@@ -1,6 +1,101 @@
-body{
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
+/* ===== Base ===== */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  color: #111827;
+}
+
+header {
+  padding: 16px 20px;
+  text-align: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ===== Config ===== */
+.config-tablero {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.config-tablero label {
+  display: inline-block;
+  margin-right: 10px;
+  font-weight: bold;
+}
+.config-tablero select {
+  padding: 6px 10px;
+  font-size: 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: pointer;
+}
+.config-tablero select:hover { border-color: #888; }
+.config-tablero select:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76,175,80,0.2);
+}
+
+#btnComenzar {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #4CAF50;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+#btnComenzar:hover { filter: brightness(1.05); }
+
+/* ===== Tablero ===== */
+.area-tablero {
+  margin: 24px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.marco-tablero {
+  width: min(80vmin, 520px);
+  aspect-ratio: 1 / 1;
+  border: 3px solid #4CAF50;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-tablero {
+  width: 100%;
+  height: 100%;
+  display: grid;              /* columnas/filas definidas por JS */
+  gap: 6px;
+  background: #f8fafb;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px #e5e7eb;
+  overflow: hidden;
+}
+
+.celda {
+  background: #e9eef3;
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
 }
