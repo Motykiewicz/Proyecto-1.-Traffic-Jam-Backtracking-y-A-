@@ -1,85 +1,92 @@
 <!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Traffic Jam</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <header>
-      <h1>Bienvenidos a Traffic Jam</h1>
-    </header>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Traffic Jam</title>
+        <link rel="stylesheet" href="styles.css">
+        <script src="script.js" defer></script>
+       
+    </head>
+    <body>
+        <header>
+            <h1>Bienvenidos a Traffic Jam</h1>
+        </header>
 
-    <main class="container">
-      <!-- descripcion -->
-      <section>
-        <h2>Descripción del Proyecto</h2>
-        <p>
-          Mediante algoritmos de búsqueda se pretende solucionar un tablero que simula un estacionamiento
-          congestionado con varios carros estacionados. Estos carros por lo general tienen 2 a 3 espacios de longitud
-          y orientaciones verticales y horizontales. También hay un carro objetivo que se debe sacar del estacionamiento.
-          La salida del carro objetivo se encuentra en los bordes del tablero y es el único carro que puede salir.
-        </p>
+        <main class ="container">
+            <!--descripcion-->
+            <section>
+                <h2>Descripcion del Proyecto</h2>
+                <p> Mediante algoritmos de busqueda se pretende solucionar un tablero que simula un estacionamiento
+                    congestionado con varios carros estacionados. Estos carros por lo general tienen 2 a 3 espacios de longitud
+                    y orientaciones verticales y horizontales. Tambien hay un carro objetivo que se debe sacar del estacionamiento.
+                    La salida del carro objetivo se encuentra en los bordes del tablero y es el unico carro que puede salir.
+                </p>
 
-        <p>
-          Los movimientos permitidos para cada carro son únicamente en línea recta y en la dirección de su orientación.
-          Los carros no pueden pasar por encima de otros carros, por lo que se pueden mover únicamente si hay espacio libre 
-          en la dirección a la que apuntan.
-        </p>
-        <p>
-          El objetivo del proyecto es encontrar la secuencia de movimientos que permita sacar el carro objetivo del 
-          estacionamiento congestionado en la menor cantidad de movimientos posibles mediante algoritmos de búsqueda.
-        </p>
-      </section>
+                <p> 
+                    Los movimientos permitidos para cada carro son unicamente en linea recta y en la direccion de su orientacion.
+                    Los carros no pueden pasar por encima de otros carros, por lo que se pueden mover unicamente si hay espacio libre 
+                    en la direccion a la que apuntan. 
+                </p>
+                <p>
+                    El objetivo del proyecto es encontrar la secuencia de movimientos que permita sacar el carro objetivo del 
+                    estacionamiento congestionado en la menor cantidad de movimientos posibles mediante algoritmos de busqueda.
+                </p>
+            </section>
 
-      <!-- instrucciones -->
-      <section>
-        <h2>Instrucciones</h2>
-        <ol>
-          <li>Selecciona el algoritmo de búsqueda en el menú desplegable.</li>
-          <li>Selecciona el tamaño del tablero en el menú desplegable.</li>
-          <li>Presiona el botón "Comenzar a resolver".</li>
-          <li>Observa cómo el algoritmo elegido resuelve el tablero.</li>
-        </ol>
-      </section>
+            <!--instrucciones-->
+            <section>
+                <h2>Instrucciones</h2>
+                <ol>
+                    <li>Selecciona el algoritmo de busqueda en el menu desplegable.</li>
+                    <li>Selecciona el tamaño del tablero en el menu desplegable.</li>
+                    <li>Presiona el boton "Comenzar a resolver" para iniciar el proceso de solucion del tablero.</li>
+                    <li>Observe como el algoritmo elegido resuelve la solucion del tablero</li>
+                    
+                </ol>
+            </section>
 
-      <!-- seleccion algoritmo -->
-      <section>
-        <h2>Algoritmo a escoger</h2>
-        <div>
-          <label for="seleccion-algoritmo">Selecciona el algoritmo de búsqueda:</label>
-          <select id="seleccion-algoritmo">
-            <option value="bfs">Breadth First Search (Colas)</option>
-            <option value="dfs">Depth First Search (Pilas)</option>
-            <option value="astar">Algoritmo A*</option>
-          </select>
-        </div>
-      </section>
+            <!--seleccion algoritmo-->
+            <section>
+                <h2>Algoritmo a escoger</h2>
+                <div>
+                    <label for="seleccion-algoritmo">Selecciona el algoritmo de busqueda:</label>
+                    <select id="seleccion-algoritmo">
+                        <option value="bfs">Breath First Search (Colas)</option>
+                        <option value="dfs">Depth First Search (Pilas)</option>
+                        <option value="A*">Algoritmo A*</option>
+                    </select>
+                </div>
+            </section>
+            <!--configuracion tablero-->
+            <section>
+                <h2>Configuración del Tablero</h2>
+                <div class="config-tablero">
+                    <label for="sizeTablero">Tamaño del tablero:</label>
+                    <select id="sizeTablero">
+                        <option value="6">6x6</option>
+                        <option value="8">8x8</option>
+                        <option value="10">10x10</option>
+                        <option value="12">12x12</option>
+                    </select>
+                </div>
+                <h2>Solucion</h2>
+                <button id="btnComenzar">Comenzar a resolver</button>
+            </section>
+            
+            <section class="area-tablero">
 
-      <!-- configuracion tablero -->
-      <section>
-        <h2>Configuración del Tablero</h2>
-        <div class="config-tablero">
-          <label for="sizeTablero">Tamaño del tablero:</label>
-          <select id="sizeTablero">
-            <option value="6">6x6</option>
-            <option value="8">8x8</option>
-            <option value="10">10x10</option>
-            <option value="12">12x12</option>
-          </select>
-        </div>
-        <h2>Solución</h2>
-        <button id="btnComenzar">Comenzar a resolver</button>
-      </section>
+                <div class="marco-tablero">
+                
 
-      <!-- tablero -->
-      <section class="area-tablero">
-        <div class="marco-tablero">
-          <div id="tablero" class="grid-tablero" aria-label="Tablero"></div>
-        </div>
-      </section>
-    </main>
-  </body>
+                <div id="tablero" class="grid-tablero" aria-label="Tablero"></div>
+                </div>
+
+            </section>
+
+
+        
+            
+        </main>
+    </body>
 </html>

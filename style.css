@@ -1,4 +1,5 @@
-/* ===== Base ===== */
+
+
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
@@ -71,9 +72,9 @@ header {
 }
 
 .marco-tablero {
-  width: min(80vmin, 520px);
-  aspect-ratio: 1 / 1;
-  border: 3px solid #4CAF50;
+  width: min(80vmin, 520px);  
+  aspect-ratio: 1 / 1;        
+  border: 3px solid #4CAF50;  
   border-radius: 12px;
   background: #ffffff;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
@@ -86,7 +87,7 @@ header {
 .grid-tablero {
   width: 100%;
   height: 100%;
-  display: grid;              /* columnas/filas definidas por JS */
+  display: grid;              
   gap: 6px;
   background: #f8fafb;
   border-radius: 8px;
