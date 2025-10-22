@@ -1,4 +1,4 @@
-
+/* ------- interfaz -----*/
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -23,20 +23,30 @@ header {
   padding: 16px;
 }
 
-/* ===== Config ===== */
-.config-tablero {
-  margin: 20px 0;
+/* ----- Controles ------ */
+
+.fila-controles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.config-tablero, .config-alg{
+  margin: 20px 10px;
   padding: 15px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.08);
 }
-.config-tablero label {
-  display: inline-block;
-  margin-right: 10px;
+
+.config-tablero label, .config-alg label {
   font-weight: bold;
+  margin-right: 10px;
 }
-.config-tablero select {
+select {
   padding: 6px 10px;
   font-size: 16px;
   border: 1px solid #cbd5e1;
@@ -44,26 +54,90 @@ header {
   background-color: #fff;
   cursor: pointer;
 }
-.config-tablero select:hover { border-color: #888; }
-.config-tablero select:focus {
+select:focus {
   outline: none;
   border-color: #4CAF50;
   box-shadow: 0 0 5px rgba(76,175,80,0.2);
 }
 
-#btnComenzar {
+
+/* ---- simbolos para los carros ---- */
+.simbolos { 
+  display: flex;
+  gap: 15px;
   margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-simbolo {
+  min-width: 36px; 
+  height: 36px;
+  border: 1px solid #cbd5e1; background: #fff;
+  border-radius: 8px; 
+  cursor: pointer;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 16px;
+  display: grid; 
+  place-items: center;
+}
+
+.btn-simbolo.activa{ 
+  border-color: #4CAF50; 
+  background: #d1fae5; 
+}
+
+
+
+/* --- botones en la interfaz ---- */
+
+.botones {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 4px;
+  flex-wrap: wrap;
+}
+.comenzar, .editar, .confirmar, .reiniciar{
   padding: 10px 14px;
   border: 0;
-  border-radius: 8px;
-  background: #4CAF50;
-  color: white;
+  border-radius: 8px; 
+  cursor: pointer; 
   font-weight: 700;
-  cursor: pointer;
 }
-#btnComenzar:hover { filter: brightness(1.05); }
 
-/* ===== Tablero ===== */
+.comenzar{
+  background: #22c55e; color:#08351c
+}
+
+.editar{
+  background: #fbbf24; color:#78350f
+}
+
+.confirmar{
+  background: #3b82f6; color:#1e40af
+}
+.reiniciar{
+  background: #ef4444; color:#7f1d1d
+}
+
+/* ------- mensajes de la interfaz -----*/
+
+.mensajes { margin-top: 8px;}
+.mensajes .ok {
+  color: #16a34a;
+  font-weight: 700;
+}
+.mensajes .error {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.mensajes ul {
+  padding-left: 20px;
+  margin: 6px 0;
+}
+
+/* ------- tablero ------ */
+
 .area-tablero {
   margin: 24px 0;
   display: flex;
@@ -71,32 +145,72 @@ header {
   align-items: center;
 }
 
-.marco-tablero {
-  width: min(80vmin, 520px);  
-  aspect-ratio: 1 / 1;        
-  border: 3px solid #4CAF50;  
+.tablero {
+  position: relative;
+  width: min(90vw, 600px);
+  aspect-ratio: 1 / 1;
+  border: 3px solid #374151;
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  padding: 10px;
+  background: #ffffffff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.grid-tablero {
+.grid-tablero{
+  display: grid;
   width: 100%;
   height: 100%;
-  display: grid;              
-  gap: 6px;
-  background: #f8fafb;
   border-radius: 8px;
-  box-shadow: inset 0 0 0 1px #e5e7eb;
-  overflow: hidden;
+  background-color: #e5e7eb;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
 }
 
 .celda {
-  background: #e9eef3;
-  border: 1px solid #cfd8dc;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  user-select: none;
+  cursor: pointer;
+}
+
+.celda.no-edicion {
+  cursor: default;
+
+}
+
+.esquina-superior-izquierda, .esquina-superior-derecha, .esquina-inferior-izquierda, .esquina-inferior-derecha {
+position: absolute;
+font-size: 12px; 
+color:#334155;
+background: rgba(255,255,255,.85); 
+padding: 2px 6px;
+border-radius: 6px;
+pointer-events: none; 
+user-select: none;
+}
+
+.esquina-superior-izquierda {
+  top: 6px;
+  left: 8px;
+}
+
+.esquina-superior-derecha {
+  top: 6px;
+  right: 8px;
+}
+
+.esquina-inferior-izquierda {
+  bottom: 6px;
+  left: 8px;
+}
+
+.esquina-inferior-derecha {
+  bottom: 6px;
+  right: 8px;
 }

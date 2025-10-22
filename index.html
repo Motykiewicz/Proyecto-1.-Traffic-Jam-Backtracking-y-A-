@@ -67,16 +67,20 @@
                     </div>
 
                     <div class = "botones">
-                        <button id="btnComenzar">Comenzar a resolver</button>
-                        <button id="btnEditar">Reiniciar Tablero</button>
-                        <button id="btnConfirmar">Limpiar Tablero</button>
-                        <button id="btnReiniciar">Mostrar Solucion</button>
+                        <button id="btnComenzar" class = "comenzar">Iniciar</button>
+                        <button id="btnEditar" class = "editar">Editar</button>
+                        <button id="btnConfirmar" class ="confirmar">Confirmar</button>
+                        <button id="btnReiniciar" class ="reiniciar">Reiniciar</button>
                     </div>
+
+                    <div id="mensajes" class="mensajes">
+                    </div>
+                        
             </section>
 
             <section class="area-tablero">
-                <div class="tablero" id="tablero">
-                    <!-- El tablero se genera dinamicamente con JS -->
+                <div class="tablero" id="marco-tablero">
+                    <!-- etiquetas para las esquinas -->
                     <div id="etiqueta-SI" class="esquina-superior-izquierda"></div>
                     <div id="etiqueta-SD" class="esquina-superior-derecha"></div>
                     <div id="etiqueta-II" class="esquina-inferior-izquierda"></div>

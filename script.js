@@ -67,3 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// open list (nodos por evaluar)
+// closed list (los que ya fueron visitados)
+/*
+
+
+
+
+
+*/
