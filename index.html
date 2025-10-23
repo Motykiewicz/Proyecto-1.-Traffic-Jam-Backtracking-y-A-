@@ -6,7 +6,6 @@
         <title>Traffic Jam</title>
         <link rel="stylesheet" href="style.css">
         <script src="script.js" defer></script>
-       
     </head>
     <body>
         <header>
@@ -20,7 +19,7 @@
                 <p> Mediante algoritmos de busqueda se pretende solucionar un tablero que simula un estacionamiento
                     congestionado con varios carros estacionados. Estos carros por lo general tienen 2 a 3 espacios de longitud
                     y orientaciones verticales y horizontales. Tambien hay un carro objetivo que se debe sacar del estacionamiento.
-                    La salida del carro objetivo se encuentra en los bordes del tablero y es el unico carro que puede salir.
+                    La salida del carro objetivo se encyuentra en los bordes del tablero y es el unico carro que puede salir.
                 </p>
 
                 <p> 
@@ -40,6 +39,25 @@
                 </p>
             </section>
 
+            <!-- NUEVO: Entrada textual requerida por el enunciado -->
+            <section class="entrada-textual">
+                <h2>Entrada textual</h2>
+                <label for="txtTablero">Tablero con símbolos (. - | &lt; &gt; v ^ B):</label>
+                <textarea id="txtTablero" rows="6" placeholder="--&gt;... 
+..|...
+..|...
+..|..B
+...... 
+......"></textarea>
+
+                <div class="fila-texto">
+                    <label for="txtSalida">Salida (x,y):</label>
+                    <input id="txtSalida" type="text" placeholder="5,3">
+                    <button id="btnCargarTexto" class="confirmar">Cargar desde texto</button>
+                </div>
+                <small>Nota: En esta versión, el carro objetivo <strong>B</strong> se asume horizontal (sale hacia la derecha por la fila de B).</small>
+            </section>
+
             <!--Controles-->
             <section>
                 <h2>Controles</h2>
@@ -57,13 +75,12 @@
                     <div class = "config-alg">
                         <label for = "seleccion-algoritmo">Selecciona el algoritmo de busqueda:</label>
                         <select id="seleccion-algoritmo">
-                            <option value="bfs">Breath First Search (Colas)</option>
-                            <option value="dfs">Depth First Search (Pilas)</option>
-                            <option value="A*">Algoritmo A* (Greedy)</option>
+                            <option value="backtracking">Backtracking</option>
+                            <option value="astar">Algoritmo A*</option>
                         </select>
                     </div>
 
-                    <div class= "simbolos" id="simbolos"> <!--aqui iriran simbolos para representar carros pero mejor ponerlo en el js-->
+                    <div class= "simbolos" id="simbolos"> <!-- se llena en JS -->
                     </div>
 
                     <div class = "botones">
@@ -73,16 +90,12 @@
                         <button id="btnReiniciar" class ="reiniciar">Reiniciar</button>
                     </div>
 
-
                     <!--esto marcara la salida para que el usuario parte de tener la casilla marcada, tiene la coordinada-->
                     <div id="posicion-salida" class="posicion-salida">Salida: </div>
-                    </div>
+                </div>
 
-
-                    <!--aqui se mostraran todos los mensajes, como errores y los de resolucionn-->
-                    <div id="mensajes" class="mensajes">
-                    </div>
-                        
+                <!--aqui se mostraran todos los mensajes, como errores y los de resolucionn-->
+                <div id="mensajes" class="mensajes"></div>
             </section>
 
             <section class="area-tablero">
@@ -95,6 +108,12 @@
 
                     <div id="tablero" class="grid-tablero" aria-label="Tablero"></div>
                 </div>
+            </section>
+
+            <section>
+                <h2>Resultados</h2>
+                <div id="metricas"></div>
+                <div id="acciones"></div>
             </section>
         </main>
     </body>

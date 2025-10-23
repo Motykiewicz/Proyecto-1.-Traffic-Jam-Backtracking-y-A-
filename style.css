@@ -92,7 +92,8 @@ select:focus {
   place-items: center;
 }
 
-.btn-simbolo.activa{ 
+/* CORREGIDO: coincide con JS */
+.btn-simbolo.activo{ 
   border-color: #4CAF50; 
   background: #d1fae5; 
 }
@@ -184,14 +185,9 @@ select:focus {
   cursor: pointer;
 }
 
-.celda.no-edicion {
-  cursor: default;
+.celda.no-edicion { cursor: default; }
 
-}
-
-.posicion-salida {
-  margin: 6px 0 0; font-weight: bold;
-}
+.posicion-salida { margin: 6px 0 0; font-weight: bold; }
 
 .celda.salida-auto{
   outline: 3px solid #22c55e;
@@ -199,32 +195,23 @@ select:focus {
 }
 
 .esquina-superior-izquierda, .esquina-superior-derecha, .esquina-inferior-izquierda, .esquina-inferior-derecha {
-position: absolute;
-font-size: 12px; 
-color:#334155;
-background: rgba(255,255,255,.85); 
-padding: 2px 6px;
-border-radius: 6px;
-pointer-events: none; 
-user-select: none;
+  position: absolute;
+  font-size: 12px; 
+  color:#334155;
+  background: rgba(255,255,255,.85); 
+  padding: 2px 6px;
+  border-radius: 6px;
+  pointer-events: none; 
+  user-select: none;
 }
 
-.esquina-superior-izquierda {
-  top: 6px;
-  left: 8px;
-}
+.esquina-superior-izquierda { top: 6px; left: 8px; }
+.esquina-superior-derecha { top: 6px; right: 8px; }
+.esquina-inferior-izquierda { bottom: 6px; left: 8px; }
+.esquina-inferior-derecha { bottom: 6px; right: 8px; }
 
-.esquina-superior-derecha {
-  top: 6px;
-  right: 8px;
-}
-
-.esquina-inferior-izquierda {
-  bottom: 6px;
-  left: 8px;
-}
-
-.esquina-inferior-derecha {
-  bottom: 6px;
-  right: 8px;
-}
+ 
+.entrada-textual textarea{ width:100%; resize: vertical; }
+.fila-texto{ display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;}
+#metricas ul { margin:6px 0; padding-left:18px; }
+#acciones ol { margin:6px 0; padding-left:18px; }
