@@ -132,16 +132,46 @@ function crearTablero(size){
             celda.dataset.y = y;
             const matriz = matrizTablero[y][x];
             celda.textContent = (matriz === '.') ? '' : matriz;
+
             celda.addEventListener('click', onClickCelda);
             tablero.appendChild(celda);
         }  
 
     }
+    renderizarMarcos(size);
     setEdicion(true);
     setPosicionSalida(null);
     renderizarSimbolos();
 }
 
+function obtenerOrientacion () // buscar los carros, el carro objetivo y anotar adonde estan apuntando (carro 1 a la derecha fila 4, etc)
+{
+    const carros = [];
+    let carroObjetivo = null;
+
+
+}
+
+
+function calcularSalida() (
+
+) // dependiendo de la posicion del carro objetivo y su orientacion, se calcula la salida
+
+
+
+function clickCelda() { // verifica si se hizo click en la celda para editarla
+
+}
+
+// funcion que unicamente permite el ingreso de los simbolos en el tablero 
+
+// function que verifique que todo este listo para empezar 
+
+// funcion que convierta los cuadros de los carros en diferentes colores para repreesentarlos mejor
+
+// funcion para el algoritmo backtracking
+
+// funcion para el algoritmo A*
 
 
 
@@ -149,7 +179,10 @@ function crearTablero(size){
 
 
 
-/*
+
+
+
+/* funcuones viejas, pueden servir para guiarse
 
 // actualizar el tamano del tablero como lo seleccione el usuario
 function actualizarSizeTablero() {
