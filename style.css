@@ -69,6 +69,17 @@ select:focus {
   flex-wrap: wrap;
 }
 
+
+
+/* --- botones en la interfaz ---- */
+
+.botones {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 4px;
+  flex-wrap: wrap;
+}
+
 .btn-simbolo {
   min-width: 36px; 
   height: 36px;
@@ -86,19 +97,7 @@ select:focus {
   background: #d1fae5; 
 }
 
-
-
-/* --- botones en la interfaz ---- */
-
-.botones {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0 4px;
-  flex-wrap: wrap;
-}
-
-
-.comenzar, .editar, .confirmar, .reiniciar, .salida{
+.comenzar, .editar, .confirmar, .reiniciar {
   padding: 10px 14px;
   border: 0;
   border-radius: 8px; 
@@ -121,31 +120,9 @@ select:focus {
   background: #ef4444; color:#7f1d1d
 }
 
-.salida{
-  background:  #ba6627; color: #693107
-}
 
-.btnElegirSalida:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
-.posicion-salida {
-  margin: 6px 0 0; font-weight: bold;
-}
 
-.celda.salida-seleccionada {
-  outline: 2px solid #22c55e;
-  background: #dcfce7;
-}
-
-.celda.canditada-salida {
-  outline: 2px dashed #22c55e
-}
-
-.celda.modo-salida {
-  cursor: crosshair;
-}
 
 /* ------- mensajes de la interfaz -----*/
 
@@ -210,6 +187,15 @@ select:focus {
 .celda.no-edicion {
   cursor: default;
 
+}
+
+.posicion-salida {
+  margin: 6px 0 0; font-weight: bold;
+}
+
+.celda.salida-auto{
+  outline: 3px solid #22c55e;
+  outline-offset: -2px;
 }
 
 .esquina-superior-izquierda, .esquina-superior-derecha, .esquina-inferior-izquierda, .esquina-inferior-derecha {

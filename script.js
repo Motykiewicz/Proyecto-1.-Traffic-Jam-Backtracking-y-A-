@@ -1,43 +1,155 @@
+/* Para iniciar se tenia planteado que el usuario elige el tamano del tablero
+elige adonde posicionar los carros (incluyendo el carro objetivo) y su orientacion. La salida aparece
+cuando ya tiene todo listo se da al boton de confirmar, las flechas se le pintan en cuadros para que simulen
+mas el comportamiento de un carro.
+
+si hace falta el usuario puede darle al boton de editar para cambiar algo y si ya esta todo listo
+le da al boton de confirmar nuevamente y luego el de comenzar. ya teniendo los carros puestos
+el carro objetivo, el tamano del tablero y el algoritmo a elegir, puede ejecutarse 
+el programa. 
+
+Hay varias medidas ya implementadas para prevenir errores, como la implementacion de un carro objetivo
+unicamente debe haber uno y sin ese no se puede comenzar. Tiene que haber una salida tambien que esta posicionada
+adonde se ubique la cabeza del carro objetivo (B), para evitar complicaciones es mas facil 
+colocar primero el carro objetivo y luego la salida. 
+
+ 
+*/
+
+
+// unas variables globales utilizadas a travez del script
+
 let sizeTablero = 6; // empezamos con un tablero de 6x6 para probar 
 let algoritmoSeleccionado = 'A*'; // algoritmo por defecto
-let edicionActiva = true;
-let herramientaActual = '.';
-let matrizTablero = [];
-
-let modoElegirSalida = false; //
-let salidaCoord = null;
-let celdaSalidaPrev = null;
-let celdaCanditadaPrev = null;
+let edicionActiva = true; // esta habilitado la opcion para editar el tablero
+let rellenoActual = '.'; // con lo que se llena la celda 
+let matrizTablero = []; // aqui iremos colocando todos los simbolos
+let salidaCoord = null; // coordenadas de la salida para tenerlo presente, asignado junto con el carro objetivo
+let celdaCanditadaPrev = null; // celda para la salida que se pintara de un color 
 
 const SIMBOLOS = ['.','-','|','<','>','v','^','B'];
-const CABEZAS = new setInterval(['>','<','v','^']);
+const CABEZAS = new set(['>','<','v','^']);
 
+
+// mientras que el usuario este editando el tablero, realice lo siguiente.
 function setEdicion(corriendo){
+    // bloquee todos los botones menos confirmar hasta que haya una salida, que se pone cuando ya este el carro objetivo
+    edicionActiva = corriendo;
+    document.querySelectorAll('.celda').forEach(celda => {celda.classList.toggle('no-edicion', !edicionActiva);});
 
+    const btnEditar = document.getElementById('btnEditar');
+    const btnConfirmar = document.getElementById('btnConfirmar');
+    const sizeTab = document.getElementById('sizeTablero');
+
+    if (btnEditar) btnEditar.disabled = edicionActiva;
+    if (btnConfirmar) btnConfirmar.disabled = !edicionActiva || (salidaCoord === null);
+    if (sizeTab) sizeTab.disabled = edicionActiva; 
 }
 
+// maneja el tamano del tablero mediante las esquinas. 
 function renderizarMarcos(size){
-    document.getElementById('etiqueta-SI').textContent = '(0,0)';
-    document.getElementById('etiqueta-SD').textContent = 
+    document.getElementById('etiqueta-SI').textContent = `(0,0)`;
+    document.getElementById('etiqueta-SD').textContent = `(${size-1},0,)`;
+    document.getElementById('etiqueta-II').textContent = `(0,${size-1})`;
+    document.getElementById('etiqueta-ID').textContent = `(${size-1},${size-1})`;
+
 }
 
+// actualiza la posicion de la etiqueda de la salida en la interfaz
+function setPosicionSalidaEtiqueta(){
+    const pos = document.getElementById('posicion-salida');
+    if (!pos) return;
+    if (!salidaCoord) pos.textContent = 'Salida: ( , )';
+    else pos.textContent = `Salida: (${salidaCoord.y}, ${salidaCoord.x})`;
+}
+
+// actualiza la posicion de la salida en la tabla. 
+function setPosicionSalida(coord){
+    if (celdaCanditadaPrev){
+        celdaCanditadaPrev.classList.remove('salida-auto');
+        celdaCanditadaPrev = null;
+    }
+    salidaCoord = coord;
+    if (coord){
+        const pos = getCelda(coord.x, coord.y);
+        if (pos){
+            pos.classList.add('salida-auto');
+            celdaCanditadaPrev = pos;
+        }
+    }
+    setPosicionSalidaEtiqueta();
+    setEdicion(edicionActiva); // actualiza el estado de los botones previamente desactivados. 
+}
+
+function getCelda(x,y){
+    return document.querySelector(`.celda[data-x='${x}'][data-y='${y}']`);
+}
+
+
+/*
+la funcion renderizarSimbolos basicamente 
+*/
+
+// se van colocando los simbolos debidamente en el tablero hasta que el usuario este satisfecho 
+function renderizarSimbolos(){
+    const simbolos = document.getElementById('simbolos');
+    if (!simbolos) return;
+    simbolos.innerHTML = '';
+
+    SIMBOLOS.forEach(simbolo => {
+        const btnSimbolo = document.createElement('button');
+        btnSimbolo.type = 'button';
+        btnSimbolo.className = 'btn-simbolo' + (simbolo === rellenoActual ? ' activo' : '');
+        btnSimbolo.textContent = simbolo;
+        btnSimbolo.title = `Simbolo: ${simbolo}`;
+        btnSimbolo.addEventListener('click', () => {
+            rellenoActualctual = simbolo;
+            simbolos.querySelectorAll('button').forEach(btn => btn.classList.remove('activo'));
+            btnSimbolo.classList.add('activo');
+        });
+        simbolos.appendChild(btnSimbolo);
+        });
+    }
+
+// se crea la matriz con el tamanao del tablero y con puntos vacios
+function Matriz(n) {
+    matrizTablero = Array.from({ length: n }, () => Array.from({ length: n }, () => '.'));
+}
 
 
 function crearTablero(size){
     const tablero = document.getElementById('tablero');
-    if (!tablero) return;
 
     tablero.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     tablero.style.gridTemplateRows = `repeat(${size}, 1fr)`;
-
     tablero.innerHTML = '';
-    const celdasTotales = size * size;
-    for (let i = 0; i < celdasTotales; i++) {
-        const celda = document.createElement('div');
-        celda.classList.add('celda');
-        tablero.appendChild(celda);
+    
+    for (let y=0; y < size; y++) {
+        for (let x=0; x < size; x++) {
+            const celda = document.createElement('div');
+            celda.className = 'celda';
+            celda.dataset.x = x;
+            celda.dataset.y = y;
+            const matriz = matrizTablero[y][x];
+            celda.textContent = (matriz === '.') ? '' : matriz;
+            celda.addEventListener('click', onClickCelda);
+            tablero.appendChild(celda);
+        }  
+
     }
+    setEdicion(true);
+    setPosicionSalida(null);
+    renderizarSimbolos();
 }
+
+
+
+
+
+
+
+
+/*
 
 // actualizar el tamano del tablero como lo seleccione el usuario
 function actualizarSizeTablero() {
@@ -89,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+*/
 // open list (nodos por evaluar)
 // closed list (los que ya fueron visitados)
 /*
