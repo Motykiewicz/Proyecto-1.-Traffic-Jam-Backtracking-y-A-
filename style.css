@@ -96,7 +96,9 @@ select:focus {
   margin: 10px 0 4px;
   flex-wrap: wrap;
 }
-.comenzar, .editar, .confirmar, .reiniciar{
+
+
+.comenzar, .editar, .confirmar, .reiniciar, .salida{
   padding: 10px 14px;
   border: 0;
   border-radius: 8px; 
@@ -117,6 +119,32 @@ select:focus {
 }
 .reiniciar{
   background: #ef4444; color:#7f1d1d
+}
+
+.salida{
+  background:  #ba6627; color: #693107
+}
+
+.btnElegirSalida:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.posicion-salida {
+  margin: 6px 0 0; font-weight: bold;
+}
+
+.celda.salida-seleccionada {
+  outline: 2px solid #22c55e;
+  background: #dcfce7;
+}
+
+.celda.canditada-salida {
+  outline: 2px dashed #22c55e
+}
+
+.celda.modo-salida {
+  cursor: crosshair;
 }
 
 /* ------- mensajes de la interfaz -----*/

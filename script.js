@@ -1,5 +1,27 @@
 let sizeTablero = 6; // empezamos con un tablero de 6x6 para probar 
 let algoritmoSeleccionado = 'A*'; // algoritmo por defecto
+let edicionActiva = true;
+let herramientaActual = '.';
+let matrizTablero = [];
+
+let modoElegirSalida = false; //
+let salidaCoord = null;
+let celdaSalidaPrev = null;
+let celdaCanditadaPrev = null;
+
+const SIMBOLOS = ['.','-','|','<','>','v','^','B'];
+const CABEZAS = new setInterval(['>','<','v','^']);
+
+function setEdicion(corriendo){
+
+}
+
+function renderizarMarcos(size){
+    document.getElementById('etiqueta-SI').textContent = '(0,0)';
+    document.getElementById('etiqueta-SD').textContent = 
+}
+
+
 
 function crearTablero(size){
     const tablero = document.getElementById('tablero');
