@@ -1,10 +1,8 @@
-/* ------- interfaz -----*/
-
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
   font-family: Arial, sans-serif;
-  background-color: #f1ceff;
+  background-color: #f4f4f4;
   margin: 0;
   padding: 0;
   color: #111827;
@@ -56,12 +54,11 @@ select {
 }
 select:focus {
   outline: none;
-  border-color: #8275f1;
+  border-color: #4CAF50;
   box-shadow: 0 0 5px rgba(76,175,80,0.2);
 }
 
-
-/* ---- simbolos para los carros ---- */
+/* ---- simbolos ---- */
 .simbolos { 
   display: flex;
   gap: 15px;
@@ -69,10 +66,7 @@ select:focus {
   flex-wrap: wrap;
 }
 
-
-
-/* --- botones en la interfaz ---- */
-
+/* --- botones ---- */
 .botones {
   display: flex;
   gap: 10px;
@@ -92,7 +86,6 @@ select:focus {
   place-items: center;
 }
 
-
 .btn-simbolo.activo{ 
   border-color: #4CAF50; 
   background: #d1fae5; 
@@ -105,58 +98,18 @@ select:focus {
   cursor: pointer; 
   font-weight: 700;
 }
+.comenzar{ background: #22c55e; color:#08351c }
+.editar{ background: #fbbf24; color:#78350f }
+.confirmar{ background: #3b82f6; color:#1e40af }
+.reiniciar{ background: #ef4444; color:#7f1d1d }
 
-.comenzar{
-  background: #22c55e; color:#08351c
-}
-
-.editar{
-  background: #fbbf24; color:#78350f
-}
-
-.confirmar{
-  background: #3b82f6; color:#1e40af
-}
-.reiniciar{
-  background: #ef4444; color:#7f1d1d
-}
-
-.objetivo{
-  padding: 10px 14px;
-  border: 0;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 700;
-  background: #8b5cf6; color:#4c1d95
-}
-
-.objetivo:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-
-
-
-/* ------- mensajes de la interfaz -----*/
-
+/* ------- mensajes -----*/
 .mensajes { margin-top: 8px;}
-.mensajes .ok {
-  color: #16a34a;
-  font-weight: 700;
-}
-.mensajes .error {
-  color: #dc2626;
-  font-weight: 700;
-}
-
-.mensajes ul {
-  padding-left: 20px;
-  margin: 6px 0;
-}
+.mensajes .ok { color: #16a34a; font-weight: 700; }
+.mensajes .error { color: #dc2626; font-weight: 700; }
+.mensajes ul { padding-left: 20px; margin: 6px 0; }
 
 /* ------- tablero ------ */
-
 .area-tablero {
   margin: 24px 0;
   display: flex;
@@ -193,43 +146,17 @@ select:focus {
   border-radius: 6px;
   display: grid;
   place-items: center;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   user-select: none;
   cursor: pointer;
+  font-size: 18px;
 }
 
 .celda.no-edicion { cursor: default; }
 
 .posicion-salida { margin: 6px 0 0; font-weight: bold; }
 
-.celda.salida-auto{
-  outline: 3px solid #22c55e;
-  outline-offset: -2px;
-}
-
-.celda.cabeza-candidata{
-  outline: 3px solid #3b82f6;
-  outline-offset: -2px;
-}
-
-.celda.car-highlight{
-  background: #fef3c7;
-  border-color: #fbbf24;
-}
-
-#tablero.modo-elegir-objetivo .celda{
-  cursor: crosshair;
-}
-
-
-.grid-tablero.modo-elegir-objetivo .celda{
-  cursor: crosshair;
-}
-
-
-/* ----- etiquetas de las esquinas -------*/
-
-.esquina-superior-izquierda, .esquina-superior-derecha, .esquina-inferior-izquierda, .esquina-inferior-derecha {
+.esquina-superior-izquierda, .esquina-superior-derecha,
+.esquina-inferior-izquierda, .esquina-inferior-derecha {
   position: absolute;
   font-size: 12px; 
   color:#334155;
@@ -239,14 +166,11 @@ select:focus {
   pointer-events: none; 
   user-select: none;
 }
-
 .esquina-superior-izquierda { top: 6px; left: 8px; }
-.esquina-superior-derecha { top: 6px; right: 8px; }
-.esquina-inferior-izquierda { bottom: 6px; left: 8px; }
-.esquina-inferior-derecha { bottom: 6px; right: 8px; }
+.esquina-superior-derecha  { top: 6px; right: 8px; }
+.esquina-inferior-izquierda{ bottom: 6px; left: 8px; }
+.esquina-inferior-derecha  { bottom: 6px; right: 8px; }
 
- 
-.entrada-textual textarea{ width:100%; resize: vertical; }
-.fila-texto{ display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;}
-#metricas ul { margin:6px 0; padding-left:18px; }
-#acciones ol { margin:6px 0; padding-left:18px; }
+.celda.salida-auto { outline: 3px solid #22c55e; outline-offset: -2px; }
+.car-highlight { box-shadow: inset 0 0 0 3px rgba(59,130,246,.6); }
+.modo-elegir-objetivo .celda { cursor: crosshair; }

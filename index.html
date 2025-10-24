@@ -1,123 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Traffic Jam</title>
-        <link rel="stylesheet" href="style.css">
-        <script src="script.js" defer></script>
-    </head>
-    <body>
-        <header>
-            <h1>Bienvenidos a Traffic Jam</h1>
-        </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traffic Jam</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>Bienvenidos a Traffic Jam</h1>
+    </header>
 
-        <main class ="container">
-            <!--descripcion de proyecto-->
-            <section>
-                <h2>Descripcion del Proyecto</h2>
-                <p> Mediante algoritmos de busqueda se pretende solucionar un tablero que simula un estacionamiento
-                    congestionado con varios carros estacionados. Estos carros por lo general tienen 2 a 3 espacios de longitud
-                    y orientaciones verticales y horizontales. Tambien hay un carro objetivo que se debe sacar del estacionamiento.
-                    La salida del carro objetivo se encyuentra en los bordes del tablero y es el unico carro que puede salir.
-                </p>
+    <main class="container">
+      <!--descripcion de proyecto-->
+      <section>
+        <h2>Descripcion del Proyecto</h2>
+        <p>
+          Mediante algoritmos de busqueda se pretende solucionar un tablero que
+          simula un estacionamiento congestionado con varios carros
+          estacionados. Estos carros por lo general tienen 2 a 3 espacios de
+          longitud y orientaciones verticales y horizontales. Tambien hay un
+          carro objetivo que se debe sacar del estacionamiento. La salida del
+          carro objetivo se encyuentra en los bordes del tablero y es el unico
+          carro que puede salir.
+        </p>
 
-                <p> 
-                    Los movimientos permitidos para cada carro son unicamente en linea recta y en la direccion de su orientacion.
-                    Los carros no pueden pasar por encima de otros carros, por lo que se pueden mover unicamente si hay espacio libre 
-                    en la direccion a la que apuntan. 
-                </p>
-                <p>
-                    El objetivo del proyecto es encontrar la secuencia de movimientos que permita sacar el carro objetivo del 
-                    estacionamiento congestionado en la menor cantidad de movimientos posibles mediante algoritmos de busqueda.
-                </p>
-                <p>
-                    El usuario construye su propio tablero mediante simbolos (-, |, <, >, ^, v, B) que representan los carros y su orientacion. 
-                    Los carros deben ser de minimo 3 espacios de longitud por ejemplo (-->) dos para el cuerpo y uno para la cabeza. La cabeza
-                    Del carro objetivo seria el simbolo (B). Los espacios sobrantes el programa los rellena con puntos (.) que representan 
-                    espacios vacios
-                </p>
-                <p>
-                    . representa una casilla vacía en el tablero.
-                </p>
-                                <p>
-                   - indica una parte de un carro orientado horizontalmente.
-                </p>
-                                <p>
-                    | indica una parte de un carro orientado verticalmente.> señala la parte frontal de un carro orientado hacia la derecha.
-                </p>
-                                <p>
-                    v marca la parte frontal de un carro orientado hacia abajo
-                </p>
-                                <p>
-                    B marca la parte frontal del carro objetivo.
-                </p>
-                                <p>
-                    El espacio vacío ( ) se utiliza para separar las casillas y mejorar la legibilidad del tablero.
-                </p>
-                                <p>
-                    La salida se debe especificar con dos números correspondientes a las coordenadas de la salida
-                    (horizontal, vertical).
-                </p>
-            </section>
+        <p>
+          Los movimientos permitidos para cada carro son unicamente en linea
+          recta y en la direccion de su orientacion. Los carros no pueden pasar
+          por encima de otros carros, por lo que se pueden mover unicamente si
+          hay espacio libre en la direccion a la que apuntan.
+        </p>
+        <p>
+          El objetivo del proyecto es encontrar la secuencia de movimientos que
+          permita sacar el carro objetivo del estacionamiento congestionado en
+          la menor cantidad de movimientos posibles mediante algoritmos de
+          busqueda.
+        </p>
+        <p>
+          El usuario construye su propio tablero mediante simbolos (-, |, &lt;,
+          &gt;, ^, v, B) que representan los carros y su orientacion. Los carros
+          deben ser de minimo 3 espacios de longitud por ejemplo (--&gt;) dos
+          para el cuerpo y uno para la cabeza. La cabeza Del carro objetivo
+          seria el simbolo (B). Los espacios sobrantes el programa los rellena
+          con puntos (.) que representan espacios vacios
+        </p>
+        <p>. representa una casilla vacía en el tablero.</p>
+        <p>- indica una parte de un carro orientado horizontalmente.</p>
+        <p>
+          | indica una parte de un carro orientado verticalmente.&gt; señala la
+          parte frontal de un carro orientado hacia la derecha.
+        </p>
+        <p>v marca la parte frontal de un carro orientado hacia abajo</p>
+        <p>B marca la parte frontal del carro objetivo.</p>
+        <p>
+          El espacio vacío ( ) se utiliza para separar las casillas y mejorar la
+          legibilidad del tablero.
+        </p>
+        <p>
+          La salida se debe especificar con dos números correspondientes a las
+          coordenadas de la salida (horizontal, vertical).
+        </p>
+      </section>
 
-            <!--Controles-->
-            <section>
-                <h2>Controles</h2>
-                <div class = "fila-controles">
-                    <div class = "config-tablero">
-                        <label for = "sizeTablero">Tamaño del tablero:</label>
-                        <select id="sizeTablero">
-                            <option value="6">6x6</option>
-                            <option value="8">8x8</option>
-                            <option value="10">10x10</option>
-                            <option value="12">12x12</option>
-                        </select>
-                    </div>
-                
-                    <div class = "config-alg">
-                        <label for = "seleccion-algoritmo">Selecciona el algoritmo de busqueda:</label>
-                        <select id="seleccion-algoritmo">
-                            <option value="backtracking">Backtracking</option>
-                            <option value="astar">Algoritmo A*</option>
-                        </select>
-                    </div>
+      <!--Controles-->
+      <section>
+        <h2>Controles</h2>
+        <div class="fila-controles">
+          <div class="config-tablero">
+            <label for="sizeTablero">Tamaño del tablero:</label>
+            <select id="sizeTablero">
+              <option value="6">6x6</option>
+              <option value="8">8x8</option>
+              <option value="10">10x10</option>
+              <option value="12">12x12</option>
+            </select>
+          </div>
 
-                    <div class= "simbolos" id="simbolos"> 
-                    </div>
+          <div class="config-alg">
+            <label for="seleccion-algoritmo"
+              >Selecciona el algoritmo de busqueda:</label
+            >
+            <select id="seleccion-algoritmo">
+              <option value="backtracking">Backtracking</option>
+              <option value="astar">Algoritmo A*</option>
+            </select>
+          </div>
 
-                    <div class = "botones">
-                        <button id="btnComenzar" class = "comenzar">Iniciar</button>
-                        <button id="btnEditar" class = "editar">Editar</button>
-                        <button id="btnConfirmar" class ="confirmar">Confirmar</button>
-                        <button id="btnReiniciar" class ="reiniciar">Reiniciar</button>
-                    </div>
+          <div class="simbolos" id="simbolos"></div>
 
-                    <!--esto marcara la salida para que el usuario parte de tener la casilla marcada, tiene la coordinada-->
-                    <div id="posicion-salida" class="posicion-salida">Salida: </div>
-                </div>
+          <div class="botones">
+            <button id="btnElegirObjetivo" class="confirmar" disabled>
+              Elegir objetivo
+            </button>
+            <button id="btnComenzar" class="comenzar">Iniciar</button>
+            <button id="btnEditar" class="editar">Editar</button>
+            <button id="btnConfirmar" class="confirmar">Confirmar</button>
+            <button id="btnReiniciar" class="reiniciar">Reiniciar</button>
+          </div>
 
-                <!--aqui se mostraran todos los mensajes, como errores y los de resolucionn-->
-                <div id="mensajes" class="mensajes"></div>
-            </section>
+          <!-- etiqueta/estado de salida -->
+          <div id="posicion-salida" class="posicion-salida">
+            Salida: ( , )
+          </div>
+        </div>
 
-            <section class="area-tablero">
-                <div class="tablero" id="marco-tablero">
-                    <!-- etiquetas para las esquinas -->
-                    <div id="etiqueta-SI" class="esquina-superior-izquierda"></div>
-                    <div id="etiqueta-SD" class="esquina-superior-derecha"></div>
-                    <div id="etiqueta-II" class="esquina-inferior-izquierda"></div>
-                    <div id="etiqueta-ID" class="esquina-inferior-derecha"></div>
+        <!-- mensajes -->
+        <div id="mensajes" class="mensajes"></div>
+      </section>
 
-                    <div id="tablero" class="grid-tablero" aria-label="Tablero"></div>
-                </div>
-            </section>
+      <section class="area-tablero">
+        <div class="tablero" id="marco-tablero">
+          <!-- etiquetas para las esquinas -->
+          <div id="etiqueta-SI" class="esquina-superior-izquierda"></div>
+          <div id="etiqueta-SD" class="esquina-superior-derecha"></div>
+          <div id="etiqueta-II" class="esquina-inferior-izquierda"></div>
+          <div id="etiqueta-ID" class="esquina-inferior-derecha"></div>
 
-            <section>
-                <h2>Resultados</h2>
-                <div id="metricas"></div>
-                <div id="acciones"></div>
-            </section>
-        </main>
-    </body>
+          <div id="tablero" class="grid-tablero" aria-label="Tablero"></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Resultados</h2>
+        <div id="metricas"></div>
+        <div id="acciones"></div>
+      </section>
+    </main>
+  </body>
 </html>
