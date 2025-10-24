@@ -199,61 +199,84 @@ function mensajeError(txt){
 
 // vamos a comprobar si en el tablero hay carros que no esten completos como dos piezas sin cabeza o asi 
 function EscanearCarros(){
-  const largo = matrizTablero.length;
+  const n = matrizTablero.length;
   const carrosIncompletos = [];
   const errores = [];
 
   // primero verifiquemos los carros horizontales 
-  for(let y=0; y<largo; y++){
+  for(let y=0; y<n; y++){
     let x=0;
-    while(x<largo){
-      if (matrizTablero[y][x] === '>' || matrizTablero[y][x] === '<'){
+    while(x<n){
+      if (matrizTablero[y][x] === '-' ){
         let x0 = x; // definimos x0 como la posicion inicial del carro 
-        while (x+1 < largo && matrizTablero[y][x+1]==='-') x++;
         let x1 = x; // definimos x1 como la posicion final del carro
+
+        while (x0 -1 < n && matrizTablero[y][x+1]==='-') x++;
+        while (x1 +1 < n && matrizTablero[y][x+1]==='-') x++;
 
         // al tener listo la posicion del carro vemos si una de las dos cabezas 
         const tieneIzquierda = (x0 > 0 && matrizTablero[y][x0-1] === '<'); 
-        const tieneDerecha = (x1 < largo-1 && matrizTablero[y][x1+1] === '>');
+        const tieneDerecha = (x1 < n-1 && matrizTablero[y][x1+1] === '>');
+        const cuerpoLen = (x1 - x0 + 1);
 
         // si nos las tiene le notificamos al usuario 
-        if (!tieneIzquierda && !tieneDerecha){
-          carrosIncompletos.push(`Carro horizontal incompleto en fila ${y}, columnas ${x0} a ${x1}`);
-        }
-        else if (tieneIzquierda && tieneDerecha){
+        if (headIzq && headDer){
           errores.push(`Error: Carro horizontal con dos cabezas en fila ${y}, columnas ${x0-1} a ${x1+1}`);
+        } else if (!headIzq && !headDer){
+          carrosIncompletos.push(`Carro horizontal incompleto en fila ${y}, columnas ${x0} a ${x1}`);
+        } else if (cuerpoLen < 2){
+          carrosIncompletos.push(`Carro horizontal demasiado corto en fila ${y}, columnas ${x0} a ${x1} (mínimo 2 de cuerpo).`);
         }
+        x = x1 + 1;
+      
+    } else {
+       x++;
+    }
+  }
+}
+
+  // ahora verificamos los carros verticales (repetimos la logica)
+    for (let x = 0; x < n; x++){
+    let y = 0;
+    while (y < n){
+      if (matrizTablero[y][x] === '|') {
+        let y0 = y, y1 = y;
+        while (y0 - 1 >= 0 && matrizTablero[y0 - 1][x] === '|') y0--;
+        while (y1 + 1 < n && matrizTablero[y1 + 1][x] === '|') y1++;
+
+        const headArr = (y0 - 1 >= 0 && matrizTablero[y0 - 1][x] === '^');
+        const headAba = (y1 + 1 < n && matrizTablero[y1 + 1][x] === 'v');
+
+        const cuerpoLen = (y1 - y0 + 1);
+        if (headArr && headAba){
+          errores.push(`Error: Carro vertical con dos cabezas en columna ${x}, filas ${y0-1} a ${y1+1}`);
+        } else if (!headArr && !headAba){
+          carrosIncompletos.push(`Carro vertical incompleto en columna ${x}, filas ${y0} a ${y1}`);
+        } else if (cuerpoLen < 2){
+          carrosIncompletos.push(`Carro vertical demasiado corto en columna ${x}, filas ${y0} a ${y1} (mínimo 2 de cuerpo).`);
+        }
+
+        y = y1 + 1; // saltar este run
+      } else {
+        y++;
       }
-      x++;
     }
   }
 
-  // ahora verificamos los carros verticales (repetimos la logica)
-  for (let x=0; x<largo; x++){
-    let y=0;
-    while(y<largo){
-      if (matrizTablero[y][x] === '|'){
-        let y0 = y; // definimos y0 como la posicion inicial del carro
-        while (y+1 < largo && matrizTablero[y+1][x]==='|') y++;
-        let y1 = y; // definimos y1 como la posicion final del carro
-
-        const tieneArriba = (y0 > 0 && matrizTablero[y0-1][x] === '^');
-        const tieneAbajo = (y1 < largo-1 && matrizTablero[y1+1][x] === 'v');
-
-        if (!tieneArriba && !tieneAbajo){
-          carrosIncompletos.push(`Carro vertical incompleto en columna ${x}, filas ${y0} a ${y1}`);
-        }
-        else if (tieneArriba && tieneAbajo){
-          errores.push(`Error: Carro vertical con dos cabezas en columna ${x}, filas ${y0-1} a ${y1+1}`);
-        }
-      }
-      y++;
+  // --- Cabezas sueltas sin cuerpo (casos borde) ---
+  for (let y = 0; y < n; y++){
+    for (let x = 0; x < n; x++){
+      const c = matrizTablero[y][x];
+      if (c === '>'){ if (x-1 < 0 || matrizTablero[y][x-1] !== '-') carrosIncompletos.push(`Cabeza '>' sin cuerpo en (${x},${y})`); }
+      if (c === '<'){ if (x+1 >= n || matrizTablero[y][x+1] !== '-') carrosIncompletos.push(`Cabeza '<' sin cuerpo en (${x},${y})`); }
+      if (c === 'v'){ if (y-1 < 0 || matrizTablero[y-1][x] !== '|') carrosIncompletos.push(`Cabeza 'v' sin cuerpo en (${x},${y})`); }
+      if (c === '^'){ if (y+1 >= n || matrizTablero[y+1][x] !== '|') carrosIncompletos.push(`Cabeza '^' sin cuerpo en (${x},${y})`); }
     }
   }
 
   return { carrosIncompletos, errores };
-
 }
+
 
 // cuando escojemos el carro objetivo reemplazamos su cabeza por 'B'
 function limpiarObjetivoCabeza(lista){
@@ -437,7 +460,6 @@ function confirmarTablero(){
   if (btnComenzar) btnComenzar.disabled = true;
 }
 
-
 function activarModoElegirObjetivo(){
   modoElegirObjetivo = true;
   document.getElementById('tablero').classList.add('modo-elegir-objetivo');
@@ -458,9 +480,8 @@ function activarModoElegirObjetivo(){
 
 
 
-// ---------------------------
 // Modelo y búsqueda
-// ---------------------------
+
 
 // Representamos cada estado como una matriz de chars.
 // Reglas asumidas (simplificadas y coherentes con tu descripción):
@@ -608,18 +629,7 @@ function longitudCoche(m, hx, hy, tipo, dirSign){
   return Math.max(len, 2); // el enunciado dice 2-3+ (cabeza+2 cuerpos mínimo)
 }
 
-// Heurística A*: distancia de B a salida + bloqueos directos delante de B
-function heuristica(m, salida){
-  const b = findB(m);
-  if(!b) return 0;
-  // asumimos B horizontal hacia la derecha
-  let dist = Math.max(0, salida.x - b.x);
-  let bloqueos = 0;
-  for(let x=b.x+1; x<=salida.x; x++){
-    if(m[b.y][x] !== '.') bloqueos++;
-  }
-  return dist + bloqueos*2;
-}
+
 
 // Aplicar movimiento (pura) sobre matriz clonada
 function aplicarMovimiento(m, move){
@@ -660,65 +670,9 @@ function resolverBacktracking(m0, salida, limite=10000){
   return { moves: solucion, explored: explorados };
 }
 
-// A* estándar con PQ mínima
-class PQ {
-  constructor(){ this.a=[]; }
-  push(x){ this.a.push(x); this._up(this.a.length-1); }
-  pop(){ const a=this.a; const top=a[0]; const last=a.pop(); if(a.length){ a[0]=last; this._down(0); } return top; }
-  isEmpty(){ return this.a.length===0; }
-  _up(i){ const a=this.a; while(i>0){ const p=(i-1)>>1; if(a[p].f <= a[i].f) break; [a[p],a[i]]=[a[i],a[p]]; i=p; } }
-  _down(i){ const a=this.a; for(;;){ let l=i*2+1, r=l+1, m=i; if(l<a.length&&a[l].f<a[m].f) m=l; if(r<a.length&&a[r].f<a[m].f) m=r; if(m===i) break; [a[i],a[m]]=[a[m],a[i]]; i=m; } }
-}
 
-function resolverAStar(m0, salida, limite=200000){
-  const startKey = hash(m0);
-  const g = new Map([[startKey,0]]);
-  const came = new Map(); // key -> {prev, move}
-  const open = new PQ();
-  open.push({ f: heuristica(m0, salida), key: startKey, m: m0 });
 
-  const visit = new Set();
-  let explorados = 0;
-
-  while(!open.isEmpty()){
-    const cur = open.pop();
-    if(visit.has(cur.key)) continue;
-    visit.add(cur.key);
-    explorados++;
-
-    if(esMeta(cur.m, salida)){
-      // reconstruir
-      const camino = [];
-      let k = cur.key;
-      while(came.has(k)){
-        const {prev, move} = came.get(k);
-        camino.push(move);
-        k = prev;
-      }
-      camino.reverse();
-      return { moves: camino, explored: explorados };
-    }
-    if(visit.size > limite) break;
-
-    const movs = generarMovimientos(cur.m);
-    for(const mv of movs){
-      const m2 = aplicarMovimiento(cur.m, mv);
-      const nk = hash(m2);
-      const tentative = (g.get(cur.key) ?? Infinity) + 1;
-      if(tentative < (g.get(nk) ?? Infinity)){
-        g.set(nk, tentative);
-        came.set(nk, { prev: cur.key, move: mv });
-        const f = tentative + heuristica(m2, salida);
-        open.push({ f, key: nk, m: m2 });
-      }
-    }
-  }
-  return { moves: null, explored: explorados };
-}
-
-// ---------------------------
 // UI: iniciar, animar, métricas
-// ---------------------------
 function pintarMetricas({elapsedMs, explored, moves}){
   document.getElementById('metricas').innerHTML = `
     <ul>

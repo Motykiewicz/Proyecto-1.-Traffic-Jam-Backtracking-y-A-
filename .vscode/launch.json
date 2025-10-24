@@ -1,18 +1,12 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "chrome",
-      "request": "launch",
-      "name": "Abrir en Chrome (localhost:3000)",
-      "url": "http://localhost:3000/",
-      "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "serve-3000",
-      "serverReadyAction": {
-        "pattern": "Available on:.*3000",
-        "uriFormat": "http://localhost:3000",
-        "action": "openExternally"
-      }
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against localhost",
+            "url": "http://127.0.0.1:5500/index.html",
+            "webRoot": "${workspaceFolder}"
+        }
+    ]
 }
