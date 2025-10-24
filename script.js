@@ -91,7 +91,7 @@ function renderizarSimbolos(){
     });
 }
 
-// matriz NxN con '.'
+// matriz NxN
 function Matriz(n) {
     matrizTablero = Array.from({ length: n }, () => Array.from({ length: n }, () => '.'));
 }
@@ -123,46 +123,7 @@ function crearTablero(size){
 }
 
 // ---------------------------
-// Entrada textual (agregada)
-// ---------------------------
-function cargarDesdeTexto(){
-  const raw = document.getElementById('txtTablero').value.trim();
-  const salidaTxt = document.getElementById('txtSalida').value.trim();
-  if(!raw){ return; }
-  const rows = raw.split('\n').map(r=>r.trim());
-  const m = rows.map(r => r.split(/\s+/)); // permite espacios
-  const n = m.length;
-  if(n<2 || n>12){ mensajeError("El tablero debe ser entre 2x2 y 12x12."); return; }
-  // normalizamos a caracteres individuales (si vienen sin espacios)
-  let ancho = Math.max(...m.map(r=>r.length));
-  if(ancho===1 && rows[0].length>1){
-    // El usuario pegó sin espacios -> tomamos cada char
-    matrizTablero = rows.map(r => r.split(''));
-  } else {
-    matrizTablero = m;
-  }
-  sizeTablero = matrizTablero.length;
-  Matriz(sizeTablero); // reinit (luego lo sobreescribimos)
-  matrizTablero = matrizTablero.map(r => r.slice());
-  crearTablero(sizeTablero);
-  // pintar
-  for(let y=0;y<sizeTablero;y++){
-    for(let x=0;x<sizeTablero;x++){
-      const v = matrizTablero[y][x];
-      const c = getCelda(x,y);
-      c.textContent = (v==='.')?'':v;
-    }
-  }
-  // salida
-  const [sx, sy] = salidaTxt.split(',').map(n => parseInt(n,10));
-  if(Number.isFinite(sx) && Number.isFinite(sy)){
-    setPosicionSalida({x:sx,y:sy});
-  }
-  mensajeOk("Tablero cargado desde texto.");
-}
-
-// ---------------------------
-// Click en celda (editar)
+// Click en celda
 // ---------------------------
 function onClickCelda(e){
     if(!edicionActiva) return;
@@ -326,59 +287,92 @@ function obtenerCarros(){
 
 }
 
+// Quita el resaltado actual de todas las celdas marcadas
 function quitarHighlight(){
+  // Recorremos cada elemento que estaba resaltado y le removemos la clase csss
   highlightActual.forEach(elemento => elemento.classList.remove('car-highlight'));
+  // Dejamos la lista vacia para evitar residuos entre seleciones.
   highlightActual = [];
 }
 
+// pinta un carro recibiendo sus celdas como pares
 function resaltarCarro(celdas){
-  quitarHighlight();
+  quitarHighlight(); // limpiamos lo que hubiera antes
+
   celdas.forEach(([x,y]) => {
+    // Obtenemos la celda por coordenadas con el helper getCelda(x,y).
     const celda = getCelda(x,y);
     if(celda){ 
+      // Agregamos la clase que aplica el estilo de resalte en CSS.
       celda.classList.add('car-highlight');
+      // Guardamos la referencia para poder quitar el estilo luego.
       highlightActual.push(celda);
     }
   });
 }
 
+// Confirma el estado actual del tablero leyendo lo que se ve en pantalla
+// y volcando cada símbolo a la matriz lógica
+// Además valida carros incompletos/errores para evitar iniciar con un estado invalido.
 function confirmarTablero(){
+  // Sincronizamos la UI con la matriz interna: si hay texto en la celda, lo copiamos;
+  // si no, ponemos '.'
   document.querySelectorAll('.celda').forEach(celda => {
     const x = parseInt(celda.dataset.x,10);
     const y = parseInt(celda.dataset.y,10);
     matrizTablero[y][x] = celda.textContent || '.';
   });
 
+  // Escaneamos el tablero buscando estructuras de carros válidas.
+  // La funcion EscanearCarros() devuelve listas de problemas detectados.
   const { carrosIncompletos, errores } = EscanearCarros();
+
+  // Si hay errores o carros incompletos, bloqueamos botones de ejecución.
   if (errores.length || carrosIncompletos.length){
     const msg = [];
-    if (carrosIncompletos.length) msg.push(`Carros incompletos:\n- ${carrosIncompletos.join('\n- ')}`);
+    if (carrosIncompletos.length) {
+      // Armamos un mensajito para debug/alerta 
+      msg.push(`Carros incompletos:\n- ${carrosIncompletos.join('\n- ')}`);
+    }
 
+    // Deshabilitamos acciones hasta que el usuario corrija el tablero.
     const btnComenzar = document.getElementById('btnComenzar'); 
     const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
     if (btnComenzar) btnComenzar.disabled = true;
     if (btnElegirObjetivo) btnElegirObjetivo.disabled = true;
-    return;
+
+    return; // salimos sin confirmar
   }
 
+  // Si todo está super, limpiamos cualquier marca de cabeza objetivo previa
   limpiarObjetivoCabeza();
+
+  // Salimos del modo edición para congelar el estado confirmado.
   setEdicion(false);
+
+  // Mostramos mesnaje de éxito al usuario.
   mensajeOk("Tablero confirmado. Listo para resolver.");
+
+  // Habilitamos elegir el objetivo Ahora que el tablero es valido.
   const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
   if (btnElegirObjetivo) btnElegirObjetivo.disabled = false;
 
+  // Mantenemos el botón “Comenzar” deshabilitado hasta que se elija el objetiV
   const btnComenzar = document.getElementById('btnComenzar');
   if (btnComenzar) btnComenzar.disabled = true;
-  }
-
-
-function activarModoElegirObjetivo(){
-  modoElegirObjetivo = true;
-  document.getElementById('tablero').classList.add('modo-elegir-objetivo');
-  mensajeOk("Modo elegir objetivo activo. Haga clic en la cabeza del carro objetivo.");
 }
 
+// Activa el modo para permitir que el usuario haga clic sobre la cabeza del carro
+function activarModoElegirObjetivo(){
+  // Flag global que otras rutinas (p.ej. onClickCelda) revisan para saber qué hacer al clic.
+  modoElegirObjetivo = true;
 
+  // Clase CSS que puede mostrar un borde distinto mientras se elige.
+  document.getElementById('tablero').classList.add('modo-elegir-objetivo');
+
+  // Damos una pista al usuario de lo que tiene que hacer.
+  mensajeOk("Modo elegir objetivo activo. Haga clic en la cabeza del carro objetivo.");
+}
 
 
 
@@ -731,7 +725,7 @@ async function comenzar(){
 }
 
 // ---------------------------
-// Inicialización (mantengo tu flujo)
+// Inicialización
 // ---------------------------
 
 function actualizarSizeTablero() {
@@ -765,7 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectAlgoritmo.addEventListener('change', actualizarAlgoritmo);
     }
 
-    // Inicializa matriz ANTES de crear tablero (fix)
+    // Inicializa matriz antes de crear tablero
     Matriz(sizeTablero);
     crearTablero(sizeTablero);
 
@@ -774,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnComenzar.addEventListener('click', comenzar);
     }
 
-    // NUEVO: botones de texto + confirmar/editar/reiniciar como ya tenías
+    // botones de texto + confirmar/editar/reiniciar
     const btnCargar = document.getElementById('btnCargarTexto');
     if(btnCargar) btnCargar.addEventListener('click', cargarDesdeTexto);
 

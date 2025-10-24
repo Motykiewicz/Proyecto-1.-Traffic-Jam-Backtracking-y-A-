@@ -4,7 +4,7 @@
 html, body { height: 100%; }
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  background-color: #f1ceff;
   margin: 0;
   padding: 0;
   color: #111827;
@@ -56,7 +56,7 @@ select {
 }
 select:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #8275f1;
   box-shadow: 0 0 5px rgba(76,175,80,0.2);
 }
 

@@ -37,25 +37,28 @@
                     Del carro objetivo seria el simbolo (B). Los espacios sobrantes el programa los rellena con puntos (.) que representan 
                     espacios vacios
                 </p>
-            </section>
-
-            <!-- NUEVO: Entrada textual requerida por el enunciado -->
-            <section class="entrada-textual">
-                <h2>Entrada textual</h2>
-                <label for="txtTablero">Tablero con símbolos (. - | &lt; &gt; v ^ B):</label>
-                <textarea id="txtTablero" rows="6" placeholder="--&gt;... 
-..|...
-..|...
-..|..B
-...... 
-......"></textarea>
-
-                <div class="fila-texto">
-                    <label for="txtSalida">Salida (x,y):</label>
-                    <input id="txtSalida" type="text" placeholder="5,3">
-                    <button id="btnCargarTexto" class="confirmar">Cargar desde texto</button>
-                </div>
-                <small>Nota: En esta versión, el carro objetivo <strong>B</strong> se asume horizontal (sale hacia la derecha por la fila de B).</small>
+                <p>
+                    . representa una casilla vacía en el tablero.
+                </p>
+                                <p>
+                   - indica una parte de un carro orientado horizontalmente.
+                </p>
+                                <p>
+                    | indica una parte de un carro orientado verticalmente.> señala la parte frontal de un carro orientado hacia la derecha.
+                </p>
+                                <p>
+                    v marca la parte frontal de un carro orientado hacia abajo
+                </p>
+                                <p>
+                    B marca la parte frontal del carro objetivo.
+                </p>
+                                <p>
+                    El espacio vacío ( ) se utiliza para separar las casillas y mejorar la legibilidad del tablero.
+                </p>
+                                <p>
+                    La salida se debe especificar con dos números correspondientes a las coordenadas de la salida
+                    (horizontal, vertical).
+                </p>
             </section>
 
             <!--Controles-->
@@ -80,7 +83,7 @@
                         </select>
                     </div>
 
-                    <div class= "simbolos" id="simbolos"> <!-- se llena en JS -->
+                    <div class= "simbolos" id="simbolos"> 
                     </div>
 
                     <div class = "botones">
@@ -88,7 +91,6 @@
                         <button id="btnEditar" class = "editar">Editar</button>
                         <button id="btnConfirmar" class ="confirmar">Confirmar</button>
                         <button id="btnReiniciar" class ="reiniciar">Reiniciar</button>
-                        <button id="btnElegirObjetivo" class ="objetivo" disabled>Elegir Objetivo</button>
                     </div>
 
                     <!--esto marcara la salida para que el usuario parte de tener la casilla marcada, tiene la coordinada-->
