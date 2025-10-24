@@ -121,6 +121,19 @@ select:focus {
   background: #ef4444; color:#7f1d1d
 }
 
+.objetivo{
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  background: #8b5cf6; color:#4c1d95
+}
+
+.objetivo:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 
 
@@ -193,6 +206,23 @@ select:focus {
   outline: 3px solid #22c55e;
   outline-offset: -2px;
 }
+
+.celda.cabeza-candidata{
+  outline: 3px dashed #3b82f6;
+  outline-offset: -2px;
+}
+
+.celda.car-highlight{
+  background: #fef3c7;
+  border-color: #fbbf24;
+}
+
+.grid-tablero.modo-elegir-objetivo .celda{
+  cursor: crosshair;
+}
+
+
+/* ----- etiquetas de las esquinas -------*/
 
 .esquina-superior-izquierda, .esquina-superior-derecha, .esquina-inferior-izquierda, .esquina-inferior-derecha {
   position: absolute;

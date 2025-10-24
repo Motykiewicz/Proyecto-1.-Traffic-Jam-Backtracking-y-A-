@@ -1,3 +1,4 @@
+
 // ---------------------------
 // Variables y constantes base
 // ---------------------------
@@ -8,6 +9,8 @@ let rellenoActual = '.';  // símbolo actual
 let matrizTablero = [];   // grilla con símbolos
 let salidaCoord = null;   // {x,y}
 let celdaCanditadaPrev = null;
+let modoElegirObjetivo = false;
+let highlightActual = [];
 
 const SIMBOLOS = ['.','-','|','<','>','v','^','B'];
 const CABEZAS = new Set(['>','<','v','^']); // FIX: Set con S mayúscula
@@ -22,11 +25,9 @@ function setEdicion(corriendo){
 
     const btnEditar = document.getElementById('btnEditar');
     const btnConfirmar = document.getElementById('btnConfirmar');
-    const sizeTab = document.getElementById('sizeTablero');
 
     if (btnEditar) btnEditar.disabled = edicionActiva;
-    if (btnConfirmar) btnConfirmar.disabled = !edicionActiva || (salidaCoord === null);
-    if (sizeTab) sizeTab.disabled = edicionActiva; 
+    if (btnConfirmar) btnConfirmar.disabled = !edicionActiva;
 }
 
 // maneja el tamano del tablero mediante las esquinas. 
@@ -79,12 +80,13 @@ function renderizarSimbolos(){
         btnSimbolo.className = 'btn-simbolo' + (simbolo === rellenoActual ? ' activo' : '');
         btnSimbolo.textContent = simbolo;
         btnSimbolo.title = `Simbolo: ${simbolo}`;
+
         btnSimbolo.addEventListener('click', () => {
-            // FIX typo: rellenoActualctual -> rellenoActual
             rellenoActual = simbolo;
             simbolos.querySelectorAll('button').forEach(btn => btn.classList.remove('activo'));
             btnSimbolo.classList.add('activo');
         });
+
         simbolos.appendChild(btnSimbolo);
     });
 }
@@ -168,11 +170,6 @@ function onClickCelda(e){
     const y = parseInt(e.currentTarget.dataset.y,10);
     matrizTablero[y][x] = rellenoActual;
     e.currentTarget.textContent = (rellenoActual === '.') ? '' : rellenoActual;
-
-    // si colocan B y no hay salida, sugerimos salida a la derecha
-    if(rellenoActual === 'B' && !salidaCoord){
-        setPosicionSalida({ x: sizeTablero-1, y });
-    }
 }
 
 // ---------------------------
@@ -184,6 +181,98 @@ function mensajeOk(txt){
 function mensajeError(txt){
   document.getElementById('mensajes').innerHTML = `<p class="error">${txt}</p>`;
 }
+
+// vamos a comprobar si en el tablero hay carros que no esten completos como dos piezas sin cabeza o asi 
+function funcionEscanearCarros(){
+  const largo = matrizTablero.length;
+  const carrosIncompletos = [];
+  const errores = [];
+
+  // primero verifiquemos los carros horizontales 
+  for(let y=0; y<largo; y++){
+    let x=0;
+    while(x<largo){
+      if (matrizTablero[y][x] === '>' || matrizTablero[y][x] === '<'){
+        let x0 = x; // definimos x0 como la posicion inicial del carro 
+        while (x+1 < largo && matrizTablero[y][x+1]==='-') x++;
+        let x1 = x; // definimos x1 como la posicion final del carro
+
+        // al tener listo la posicion del carro vemos si una de las dos cabezas 
+        const tieneIzquierda = (x0 > 0 && matrizTablero[y][x0-1] === '<'); 
+        const tieneDerecha = (x1 < largo-1 && matrizTablero[y][x1+1] === '>');
+
+        // si nos las tiene le notificamos al usuario 
+        if (!tieneIzquierda && !tieneDerecha){
+          carrosIncompletos.push(`Carro horizontal incompleto en fila ${y}, columnas ${x0} a ${x1}`);
+        }
+        else if (tieneIzquierda && tieneDerecha){
+          errores.push(`Error: Carro horizontal con dos cabezas en fila ${y}, columnas ${x0-1} a ${x1+1}`);
+        }
+      }
+      x++;
+    }
+  }
+
+  // ahora verificamos los carros verticales (repetimos la logica)
+  for (let x=0; x<largo; x++){
+    let y=0;
+    while(y<largo){
+      if (matrizTablero[y][x] === '|'){
+        let y0 = y; // definimos y0 como la posicion inicial del carro
+        while (y+1 < largo && matrizTablero[y+1][x]==='|') y++;
+        let y1 = y; // definimos y1 como la posicion final del carro
+
+        const tieneArriba = (y0 > 0 && matrizTablero[y0-1][x] === '^');
+        const tieneAbajo = (y1 < largo-1 && matrizTablero[y1+1][x] === 'v');
+
+        if (!tieneArriba && !tieneAbajo){
+          carrosIncompletos.push(`Carro vertical incompleto en columna ${x}, filas ${y0} a ${y1}`);
+        }
+        else if (tieneArriba && tieneAbajo){
+          errores.push(`Error: Carro vertical con dos cabezas en columna ${x}, filas ${y0-1} a ${y1+1}`);
+        }
+      }
+      y++;
+    }
+  }
+
+  return { carrosIncompletos, errores };
+
+}
+
+// cuando escojemos el carro objetivo reemplazamos su cabeza por 'B'
+function limpiarObjetivoCabeza(lista){
+  document.querySelectorAll('.cabeza-objetivo')
+  .forEach(elem => elem.classList.remove('cabeza-objetivo'));
+}
+
+
+// marca las cabeza del objetivo en el tablero
+function marcarCabezaObjetivo(lista){
+  limpiarObjetivoCabeza();
+  lista.forEach(({x,y}) => {
+    const celda = getCelda(x,y);
+    if(celda) celda.classList.add('cabeza-objetivo');
+  });
+}
+
+
+function obtenerCarros(){
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ---------------------------
 // Modelo y búsqueda
