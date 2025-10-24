@@ -183,7 +183,7 @@ function mensajeError(txt){
 }
 
 // vamos a comprobar si en el tablero hay carros que no esten completos como dos piezas sin cabeza o asi 
-function funcionEscanearCarros(){
+function EscanearCarros(){
   const largo = matrizTablero.length;
   const carrosIncompletos = [];
   const errores = [];
@@ -256,19 +256,127 @@ function marcarCabezaObjetivo(lista){
   });
 }
 
-
+// con esta funcion podremos ubicar un carro completo en el tablero (para cada carro) para escoger el carro objetivo
 function obtenerCarros(){
-  
+  const matriz = matrizTablero[y][x];
+  const tamano = sizeTablero;
+
+  // buscamos primero los carros horizontales
+  // iniciamos buscandos en cada fila las cabezas
+  if (matriz === '>' || matriz === '<'){
+    const direccion = (matriz === '>') ? -1 : +1; // definimos la direccion del cuerpo del carro, por ejemplo si la cabez esta asi > sabemos que el cuerpo va a la izq
+    const celdas = [[x,y]]; // guardamos la posicion de la cabeza
+    let nx = x + direccion;
+    while (nx >=0 && nx < tamano && matrizTablero[y][nx] === '-'){ // verificamos mientras no salgamos del tablero y hasta el final del cuerpo
+      celdas.push([nx,y]); // cuardamos la posicion de la cabeza
+      nx += direccion;
+    }
+    return { orientacion: 'H', cabeza: {x,y}, numeroCabezas:1, celdas }; // retornamos la informacion del carro y con el numero de cabezas podemos verificar si es valido el carro
+  }
+
+  // ahora buscamos los carros verticales (mismo procedimiento)
+  if (matriz === 'v' || matriz === '^'){
+    const direccion = (matriz === 'v') ? -1 : +1; // definimos la direccion del cuerpo del carro
+    const celdas = [[x,y]]; // guardamos la posicion de la cabeza
+    let ny = y + direccion;
+    while (ny >=0 && ny < tamano && matrizTablero[ny][x] === '|'){ // verificamos mientras no salgamos del tablero y hasta el final del cuerpo
+      celdas.push([x,ny]); // cuardamos la posicion de la cabeza
+      ny += direccion;
+    }
+    return { orientacion: 'V', cabeza: {x,y}, numeroCabezas:1, celdas }; // retornamos la informacion del carro y con el numero de cabezas podemos verificar si es valido el carro
+  }
+
+  // ya que tenemos las cabezas y los carros queremos poder reconocer los cuerpos de todos los carros para marcarlos si el usuario los pasa por encima (highlight)
+  // empecemos por los carros horizontales
+  if (matriz === '-'){
+    let x0 = x;
+    let x1 = x;
+    
+    while (x0 - 1 >= 0 && matrizTablero[y][x0 - 1] === '-') x0--; // retrocedemos hasta encontrar la cabeza
+    while (x1 + 1 < tamano && matrizTablero[y][x1 + 1] === '-') x1++; // o avanzamos hasta encontrar la cabeza
+
+    const cabezaIzq = (x0 - 1 >= 0 && (matrizTablero[y][x0 - 1] === '<') ? {x: x0 - 1, y} : null); // verificamos si hay cabeza a la izquierda
+    const cabezaDer = (x1 + 1 < tamano && (matrizTablero[y][x1 + 1] === '>') ? {x: x1 + 1, y} : null); // verificamos si hay cabeza a la derecha
+    const celdas = []; 
+    for(let xx = x0; xx <= x1; xx++) celdas.push([xx,y]); // guardamos cada una de las posiciones desde la cabeza hasta el final del cuerpo 
+    if (cabezaIzq) celdas.push([cabezaIzq.x, cabezaIzq.y]);
+    if (cabezaDer) celdas.push([cabezaDer.x, cabezaDer.y]);
+    const numeroCabezas = (cabezaIzq ? 1 : 0) + (cabezaDer ? 1 : 0);
+    return { orientacion: 'H', cabeza: cabezaIzq || cabezaDer, numeroCabezas, celdas }; // retornamos la informacion del carro
+
+  }
+
+  // por ultimo los carros verticales
+  if (matriz === '|'){
+    let y0 = y;
+    let y1 = y;
+
+    while (y0 - 1 >= 0 && matrizTablero[y0 - 1][x] === '|') y0--; // retrocedemos hasta encontrar la cabeza
+    while (y1 + 1 < tamano && matrizTablero[y1 + 1][x] === '|') y1++; // o avanzamos hasta encontrar la cabeza
+
+    const cabezaArr = (y0 - 1 >= 0 && (matrizTablero[y0 - 1][x] === '^') ? {x, y: y0 - 1} : null); // verificamos si hay cabeza arriba
+    const cabezaAba = (y1 + 1 < tamano && (matrizTablero[y1 + 1][x] === 'v') ? {x, y: y1 + 1} : null); // verificamos si hay cabeza abajo
+    const celdas = [];
+    for(let yy = y0; yy <= y1; yy++) celdas.push([x,yy]); // guardamos cada una de las posiciones desde la cabeza hasta el final del cuerpo
+    if (cabezaArr) celdas.push([cabezaArr.x, cabezaArr.y]);
+    if (cabezaAba) celdas.push([cabezaAba.x, cabezaAba.y]);
+    const numeroCabezas = (cabezaArr ? 1 : 0) + (cabezaAba ? 1 : 0);
+    return { orientacion: 'V', cabeza: cabezaArr || cabezaAba, numeroCabezas, celdas }; // retornamos la informacion del carro
+  }
+
 }
 
+function quitarHighlight(){
+  highlightActual.forEach(elemento => elemento.classList.remove('car-highlight'));
+  highlightActual = [];
+}
+
+function resaltarCarro(celdas){
+  quitarHighlight();
+  celdas.forEach(([x,y]) => {
+    const celda = getCelda(x,y);
+    if(celda){ 
+      celda.classList.add('car-highlight');
+      highlightActual.push(celda);
+    }
+  });
+}
+
+function confirmarTablero(){
+  document.querySelectorAll('.celda').forEach(celda => {
+    const x = parseInt(celda.dataset.x,10);
+    const y = parseInt(celda.dataset.y,10);
+    matrizTablero[y][x] = celda.textContent || '.';
+  });
+
+  const { carrosIncompletos, errores } = EscanearCarros();
+  if (errores.length || carrosIncompletos.length){
+    const msg = [];
+    if (carrosIncompletos.length) msg.push(`Carros incompletos:\n- ${carrosIncompletos.join('\n- ')}`);
+
+    const btnComenzar = document.getElementById('btnComenzar'); 
+    const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
+    if (btnComenzar) btnComenzar.disabled = true;
+    if (btnElegirObjetivo) btnElegirObjetivo.disabled = true;
+    return;
+  }
+
+  limpiarObjetivoCabeza();
+  setEdicion(false);
+  mensajeOk("Tablero confirmado. Listo para resolver.");
+  const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
+  if (btnElegirObjetivo) btnElegirObjetivo.disabled = false;
+
+  const btnComenzar = document.getElementById('btnComenzar');
+  if (btnComenzar) btnComenzar.disabled = true;
+  }
 
 
-
-
-
-
-
-
+function activarModoElegirObjetivo(){
+  modoElegirObjetivo = true;
+  document.getElementById('tablero').classList.add('modo-elegir-objetivo');
+  mensajeOk("Modo elegir objetivo activo. Haga clic en la cabeza del carro objetivo.");
+}
 
 
 
