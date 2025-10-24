@@ -217,6 +217,11 @@ select:focus {
   border-color: #fbbf24;
 }
 
+#tablero.modo-elegir-objetivo .celda{
+  cursor: crosshair;
+}
+
+
 .grid-tablero.modo-elegir-objetivo .celda{
   cursor: crosshair;
 }

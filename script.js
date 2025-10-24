@@ -25,9 +25,11 @@ function setEdicion(corriendo){
 
     const btnEditar = document.getElementById('btnEditar');
     const btnConfirmar = document.getElementById('btnConfirmar');
+    const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
 
     if (btnEditar) btnEditar.disabled = edicionActiva;
     if (btnConfirmar) btnConfirmar.disabled = !edicionActiva;
+    if (btnElegirObjetivo) btnElegirObjetivo.disabled = edicionActiva;
 }
 
 // maneja el tamano del tablero mediante las esquinas. 
@@ -96,7 +98,7 @@ function Matriz(n) {
     matrizTablero = Array.from({ length: n }, () => Array.from({ length: n }, () => '.'));
 }
 
-// crear grilla
+// crear grid
 function crearTablero(size){
     const tablero = document.getElementById('tablero');
     tablero.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
@@ -112,7 +114,9 @@ function crearTablero(size){
             const matriz = matrizTablero[y][x];
             celda.textContent = (matriz === '.') ? '' : matriz;
 
-            celda.addEventListener('click', onClickCelda); // FIX: nombre consistente
+            celda.addEventListener('click', onClickCelda); 
+            celda.addEventListener('mouseenter', hoverCelda);
+            celda.addEventListener('mouseleave', salirHoverCelda);
             tablero.appendChild(celda);
         }  
     }
@@ -161,20 +165,71 @@ function cargarDesdeTexto(){
   mensajeOk("Tablero cargado desde texto.");
 }
 
-// ---------------------------
-// Click en celda (editar)
-// ---------------------------
+
+// Click en celda 
 function onClickCelda(e){
-    if(!edicionActiva) return;
-    const x = parseInt(e.currentTarget.dataset.x,10);
-    const y = parseInt(e.currentTarget.dataset.y,10);
-    matrizTablero[y][x] = rellenoActual;
-    e.currentTarget.textContent = (rellenoActual === '.') ? '' : rellenoActual;
+  const x = parseInt(e.currentTarget.dataset.x,10);
+  const y = parseInt(e.currentTarget.dataset.y,10);
+
+  if (modoElegirObjetivo){
+    const carro = obtenerCarrosDesdeCelda(x,y);
+    if (!carro){
+      mensajeError("Por favor, seleccione una celda que sea parte de un carro.");
+      return;
+    }
+    if (!carro || carro.numeroCabezas !== 1){
+      mensajeError("Por favor, seleccione la cabeza de un carro válido (con una sola cabeza).");
+    return;
+    }
+
+    const { x: hx, y: hy, char: headChar } = carro.cabeza;
+
+    // marcamos la cabeza del objetivo
+    matrizTablero[hy][hx] = 'B';
+    const celdaCabeza = getCelda(hx, hy);
+    if (celdaCabeza) celdaCabeza.textContent = 'B';
+    
+
+    // calculamos la salida automaticamente con el carro objetivo
+    const salida = calcularSalidaParaCarro(hx, hy, headChar); 
+    setPosicionSalida(salida);
+
+    //salimos del modo objetivo 
+    modoElegirObjetivo = false;
+    document.getElementById('tablero').classList.remove('modo-elegir-objetivo');
+    quitarHighlight();
+    mensajeOk(`Objetivo seleccionado. Salida: (${salida.x}, ${salida.y}). Ahora puedes Iniciar.`);
+
+    // ya que tenemos el carro objetivo habilitamos el boton de comenzar
+    const btnComenzar = document.getElementById('btnComenzar');
+    if (btnComenzar) btnComenzar.disabled = false;
+
+    // desabilitamos el modo elegir objetivo
+    const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
+    if (btnElegirObjetivo) btnElegirObjetivo.disabled = true;
+
+    return;
+  }
+
+  if (!edicionActiva) return;
+  matrizTablero[y][x] = rellenoActual;
+  e.currentTarget.textContent = (rellenoActual === '.') ? '' : rellenoActual;
 }
 
-// ---------------------------
+
+function calcularSalidaParaCarro(hx, hy, headChar){
+  const n = sizeTablero;
+  if (orientacion === '>') return {x: n-1, y: hy}; // derecha
+  if (orientacion === '<') return {x: 0, y: hy};   // izquierda
+  if (orientacion === 'v') return {x: hx, y: n-1}; // abajo
+  if (orientacion === '^') return {x: hx, y: 0};   // arriba
+  return { x: n-1, y: hy}; // por defecto derecha
+
+}
+
+
+
 // Mensajes
-// ---------------------------
 function mensajeOk(txt){
   document.getElementById('mensajes').innerHTML = `<p class="ok">${txt}</p>`;
 }
@@ -257,7 +312,7 @@ function marcarCabezaObjetivo(lista){
 }
 
 // con esta funcion podremos ubicar un carro completo en el tablero (para cada carro) para escoger el carro objetivo
-function obtenerCarros(){
+function obtenerCarrosDesdeCelda(x,y){
   const matriz = matrizTablero[y][x];
   const tamano = sizeTablero;
 
@@ -271,7 +326,7 @@ function obtenerCarros(){
       celdas.push([nx,y]); // cuardamos la posicion de la cabeza
       nx += direccion;
     }
-    return { orientacion: 'H', cabeza: {x,y}, numeroCabezas:1, celdas }; // retornamos la informacion del carro y con el numero de cabezas podemos verificar si es valido el carro
+    return { orientacion: 'H', cabeza: {x,y, char: matriz}, numeroCabezas:1, celdas }; // retornamos la informacion del carro y con el numero de cabezas podemos verificar si es valido el carro
   }
 
   // ahora buscamos los carros verticales (mismo procedimiento)
@@ -283,7 +338,7 @@ function obtenerCarros(){
       celdas.push([x,ny]); // cuardamos la posicion de la cabeza
       ny += direccion;
     }
-    return { orientacion: 'V', cabeza: {x,y}, numeroCabezas:1, celdas }; // retornamos la informacion del carro y con el numero de cabezas podemos verificar si es valido el carro
+    return { orientacion: 'V', cabeza: {x,y, char: matriz}, numeroCabezas:1, celdas }; // retornamos la informacion del carro y con el numero de cabezas podemos verificar si es valido el carro
   }
 
   // ya que tenemos las cabezas y los carros queremos poder reconocer los cuerpos de todos los carros para marcarlos si el usuario los pasa por encima (highlight)
@@ -295,8 +350,8 @@ function obtenerCarros(){
     while (x0 - 1 >= 0 && matrizTablero[y][x0 - 1] === '-') x0--; // retrocedemos hasta encontrar la cabeza
     while (x1 + 1 < tamano && matrizTablero[y][x1 + 1] === '-') x1++; // o avanzamos hasta encontrar la cabeza
 
-    const cabezaIzq = (x0 - 1 >= 0 && (matrizTablero[y][x0 - 1] === '<') ? {x: x0 - 1, y} : null); // verificamos si hay cabeza a la izquierda
-    const cabezaDer = (x1 + 1 < tamano && (matrizTablero[y][x1 + 1] === '>') ? {x: x1 + 1, y} : null); // verificamos si hay cabeza a la derecha
+    const cabezaIzq = (x0 - 1 >= 0 && (matrizTablero[y][x0 - 1] === '<') ? {x: x0 - 1, y, char:'<'} : null); // verificamos si hay cabeza a la izquierda
+    const cabezaDer = (x1 + 1 < tamano && (matrizTablero[y][x1 + 1] === '>') ? {x: x1 + 1, y, char:'>'} : null); // verificamos si hay cabeza a la derecha
     const celdas = []; 
     for(let xx = x0; xx <= x1; xx++) celdas.push([xx,y]); // guardamos cada una de las posiciones desde la cabeza hasta el final del cuerpo 
     if (cabezaIzq) celdas.push([cabezaIzq.x, cabezaIzq.y]);
@@ -314,8 +369,8 @@ function obtenerCarros(){
     while (y0 - 1 >= 0 && matrizTablero[y0 - 1][x] === '|') y0--; // retrocedemos hasta encontrar la cabeza
     while (y1 + 1 < tamano && matrizTablero[y1 + 1][x] === '|') y1++; // o avanzamos hasta encontrar la cabeza
 
-    const cabezaArr = (y0 - 1 >= 0 && (matrizTablero[y0 - 1][x] === '^') ? {x, y: y0 - 1} : null); // verificamos si hay cabeza arriba
-    const cabezaAba = (y1 + 1 < tamano && (matrizTablero[y1 + 1][x] === 'v') ? {x, y: y1 + 1} : null); // verificamos si hay cabeza abajo
+    const cabezaArr = (y0 - 1 >= 0 && (matrizTablero[y0 - 1][x] === '^') ? {x, y: y0 - 1, char:'^'} : null); // verificamos si hay cabeza arriba
+    const cabezaAba = (y1 + 1 < tamano && (matrizTablero[y1 + 1][x] === 'v') ? {x, y: y1 + 1, char: 'v'} : null); // verificamos si hay cabeza abajo
     const celdas = [];
     for(let yy = y0; yy <= y1; yy++) celdas.push([x,yy]); // guardamos cada una de las posiciones desde la cabeza hasta el final del cuerpo
     if (cabezaArr) celdas.push([cabezaArr.x, cabezaArr.y]);
@@ -342,17 +397,46 @@ function resaltarCarro(celdas){
   });
 }
 
+function hoverCelda(e){
+  if(!modoElegirObjetivo) return;
+  const x = parseInt(e.currentTarget.dataset.x,10);
+  const y = parseInt(e.currentTarget.dataset.y,10);
+  const carro = obtenerCarrosDesdeCelda(x,y);
+  if (carro && carro.numeroCabezas === 1){
+    resaltarCarro(carro.celdas);
+  } else {
+    quitarHighlight();
+  }
+}
+
+function salirHoverCelda(e){
+  if(!modoElegirObjetivo) return;
+  quitarHighlight();
+}
+
 function confirmarTablero(){
   document.querySelectorAll('.celda').forEach(celda => {
     const x = parseInt(celda.dataset.x,10);
     const y = parseInt(celda.dataset.y,10);
-    matrizTablero[y][x] = celda.textContent || '.';
+    const ch = (celda.textContent || '').trim();
+    matrizTablero[y][x] = ('.-<>v^|B'.includes(ch)) ? ch : '.';
   });
 
+  document.querySelectorAll('.celda').forEach(celda => {
+    const x = parseInt(celda.dataset.x,10);
+    const y = parseInt(celda.dataset.y,10);
+    const matriz = matrizTablero[y][x];
+    celda.textContent = (matriz === '.') ? '' : matriz;
+  });
+
+  // ahora validamos el tablero 
   const { carrosIncompletos, errores } = EscanearCarros();
   if (errores.length || carrosIncompletos.length){
     const msg = [];
     if (carrosIncompletos.length) msg.push(`Carros incompletos:\n- ${carrosIncompletos.join('\n- ')}`);
+    if (errores.length) msg.push(`Errores encontrados:\n- ${errores.join('\n- ')}`);
+    
+    mensajeError(msg.join('<br>'));
 
     const btnComenzar = document.getElementById('btnComenzar'); 
     const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
@@ -369,7 +453,7 @@ function confirmarTablero(){
 
   const btnComenzar = document.getElementById('btnComenzar');
   if (btnComenzar) btnComenzar.disabled = true;
-  }
+}
 
 
 function activarModoElegirObjetivo(){
@@ -774,6 +858,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnComenzar.addEventListener('click', comenzar);
     }
 
+    const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
+    if (btnElegirObjetivo) btnElegirObjetivo.addEventListener('click', activarModoElegirObjetivo);
+
     // NUEVO: botones de texto + confirmar/editar/reiniciar como ya tenías
     const btnCargar = document.getElementById('btnCargarTexto');
     if(btnCargar) btnCargar.addEventListener('click', cargarDesdeTexto);
@@ -782,7 +869,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnEditar) btnEditar.addEventListener('click', ()=> setEdicion(true));
 
     const btnConfirmar = document.getElementById('btnConfirmar');
-    if(btnConfirmar) btnConfirmar.addEventListener('click', ()=> setEdicion(false));
+    if(btnConfirmar) btnConfirmar.addEventListener('click', confirmarTablero);
 
     const btnReiniciar = document.getElementById('btnReiniciar');
     if(btnReiniciar) btnReiniciar.addEventListener('click', ()=>{
