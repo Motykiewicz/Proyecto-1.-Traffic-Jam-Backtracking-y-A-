@@ -92,7 +92,7 @@ select:focus {
   place-items: center;
 }
 
-/* CORREGIDO: coincide con JS */
+
 .btn-simbolo.activo{ 
   border-color: #4CAF50; 
   background: #d1fae5; 
