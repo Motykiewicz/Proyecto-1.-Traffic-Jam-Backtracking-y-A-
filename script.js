@@ -12,8 +12,9 @@ let modoElegirObjetivo = false;
 let highlightActual = [];
 let headCharSeleccionado = null;
 
-const SIMBOLOS = ['.','-','|','<','>','v','^','B'];
+const SIMBOLOS = ['.','-','|','<','>','v','^'];
 const CABEZAS = new Set(['>','<','v','^']);
+const VALIDOS = new Set(['.','-','|','<','>','v','^','B']);
 
 // ---------------------------
 // Utilidades UI
@@ -352,7 +353,7 @@ function obtenerCarrosDesdeCelda(x,y){
 
   return null;
 }
-/*
+
 function normalizarChar(ch){
   if (ch === 'I') return '|';
   if (ch === '—' || ch === '–' || ch === '−') return '-';
@@ -367,7 +368,7 @@ function confirmarTablero(){
     const y = parseInt(celda.dataset.y,10);
     const ch = (celda.textContent || '').trim();
     const norm = normalizarChar(ch);
-    matrizTablero[y][x] = ('.-<>v^|B'.includes(norm)) ? norm : '.';
+    matrizTablero[y][x] = (norm && VALIDOS.has(norm)) ? norm: '.';
   });
 
   // repinta valores normalizados
@@ -413,7 +414,7 @@ function activarModoElegirObjetivo(){
   document.getElementById('tablero').classList.add('modo-elegir-objetivo');
   mensajeOk("Modo elegir objetivo activo. Haga clic en la cabeza del carro objetivo.");
 }
-*/
+
 
 
 // ---------------------------
