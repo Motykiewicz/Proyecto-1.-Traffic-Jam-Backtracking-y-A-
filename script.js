@@ -10,9 +10,11 @@ let salidaCoord = null;   // {x,y}
 let celdaCanditadaPrev = null;
 let modoElegirObjetivo = false;
 let highlightActual = [];
+let headCharSeleccionado = null;
 
-const SIMBOLOS = ['.','-','|','<','>','v','^','B'];
+const SIMBOLOS = ['.','-','|','<','>','v','^'];
 const CABEZAS = new Set(['>','<','v','^']);
+const VALIDOS = new Set(['.','-','|','<','>','v','^','B']);
 
 // ---------------------------
 // Utilidades UI
@@ -61,6 +63,7 @@ function setPosicionSalida(coord){
   }
   setPosicionSalidaEtiqueta();
   setEdicion(edicionActiva);
+  actualizarReglaSalida();
 }
 
 function getCelda(x,y){
@@ -126,6 +129,7 @@ function onClickCelda(e){
   const x = parseInt(e.currentTarget.dataset.x,10);
   const y = parseInt(e.currentTarget.dataset.y,10);
 
+  // ----- MODO ELEGIR OBJETIVO -----
   if (modoElegirObjetivo){
     const carro = obtenerCarrosDesdeCelda(x,y);
     if (!carro){
@@ -133,28 +137,31 @@ function onClickCelda(e){
       return;
     }
     if (carro.numeroCabezas !== 1){
-      mensajeError("Por favor, seleccione la cabeza de un carro válido (con una sola cabeza).");
+      mensajeError("Por favor, seleccione la CABEZA de un carro válido (exactamente una cabeza).");
       return;
     }
 
     const { x: hx, y: hy, char: headChar } = carro.cabeza;
 
-    // marcamos la cabeza del objetivo
+    // Marcar cabeza elegida como B
     matrizTablero[hy][hx] = 'B';
     const celdaCabeza = getCelda(hx, hy);
     if (celdaCabeza) celdaCabeza.textContent = 'B';
 
-    // calcular salida y marcar
-    const salida = calcularSalidaParaCarro(hx, hy, headChar); 
-    setPosicionSalida(salida);
+    headCharSeleccionado = headChar;
 
-    // salir de modo elegir objetivo
+    // Salida en el borde consistente con la orientación de la cabeza elegida
+    const salida = calcularSalidaParaCarro(hx, hy, headChar);
+    setPosicionSalida(salida);
+    actualizarReglaSalida();
+
+    // Salir de modo objetivo
     modoElegirObjetivo = false;
     document.getElementById('tablero').classList.remove('modo-elegir-objetivo');
     quitarHighlight();
     mensajeOk(`Objetivo seleccionado. Salida: (${salida.x}, ${salida.y}). Ahora puedes Iniciar.`);
 
-    // habilitar Iniciar y deshabilitar elegir objetivo
+    // Habilitar Iniciar / deshabilitar Elegir objetivo
     const btnComenzar = document.getElementById('btnComenzar');
     if (btnComenzar) btnComenzar.disabled = false;
     const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
@@ -162,9 +169,19 @@ function onClickCelda(e){
     return;
   }
 
+  // ----- MODO EDICIÓN NORMAL -----
   if (!edicionActiva) return;
+
+  // Escribir símbolo
   matrizTablero[y][x] = rellenoActual;
   e.currentTarget.textContent = (rellenoActual === '.') ? '' : rellenoActual;
+
+  // Si el usuario edita el tablero, la salida previa ya no es válida
+  setPosicionSalida(null);
+  const btnElegirObjetivo = document.getElementById('btnElegirObjetivo');
+  if (btnElegirObjetivo) btnElegirObjetivo.disabled = true;
+  const btnComenzar = document.getElementById('btnComenzar');
+  if (btnComenzar) btnComenzar.disabled = true;
 }
 
 // función para calcular la salida según la cabeza ===
@@ -174,7 +191,7 @@ function calcularSalidaParaCarro(hx, hy, headChar){
   if (headChar === '<') return { x: 0,   y: hy }; // izquierda
   if (headChar === 'v') return { x: hx,  y: n-1 }; // abajo
   if (headChar === '^') return { x: hx,  y: 0   }; // arriba
-  return { x: n-1, y: hy }; // fallback
+  return { x: n-1, y: hy }; // fallback horizontal
 }
 
 // Mensajes
@@ -191,25 +208,35 @@ function EscanearCarros(){
   const carrosIncompletos = [];
   const errores = [];
 
-  // --- HORIZONTALES: agrupar secuencias de '-' por FILA y chequear cabeza pegada ---
-for (let y = 0; y < matrizTablero.length; y++){
-  let x = 0;
-  while (x < matrizTablero.length){
+  // --- HORIZONTALES ---
+  for (let y = 0; y < matrizTablero.length; y++){
+    let x = 0;
+    while (x < matrizTablero.length){
 
-    // 1) Bloque de cuerpo horizontal
-    if (matrizTablero[y][x] === '-') {
-      let x0 = x;
-      while (x + 1 < matrizTablero.length && matrizTablero[y][x + 1] === '-') x++;
-      let x1 = x;
+      if (matrizTablero[y][x] === '-') {
+        let x0 = x;
+        while (x + 1 < matrizTablero.length && matrizTablero[y][x + 1] === '-') x++;
+        let x1 = x;
 
-      const headLeft  = (x0 - 1 >= 0 && matrizTablero[y][x0 - 1] === '<'); // cabeza a la IZQ pegada
-      const headRight = (x1 + 1 <  matrizTablero.length && matrizTablero[y][x1 + 1] === '>'); // cabeza a la DER pegada
+        const headLeft  = (x0 - 1 >= 0 && matrizTablero[y][x0 - 1] === '<');
+        const headRight = (x1 + 1 <  matrizTablero.length && matrizTablero[y][x1 + 1] === '>');
 
-      if (!headLeft && !headRight){
-        carrosIncompletos.push(`Carro horizontal incompleto en fila ${y}, columnas ${x0} a ${x1}`);
-      } else if (headLeft && headRight){
-        errores.push(`Error: Carro horizontal con dos cabezas en fila ${y}, columnas ${x0-1} a ${x1+1}`);
+        if (!headLeft && !headRight){
+          carrosIncompletos.push(`Carro horizontal incompleto en fila ${y}, columnas ${x0} a ${x1}`);
+        } else if (headLeft && headRight){
+          errores.push(`Error: Carro horizontal con dos cabezas en fila ${y}, columnas ${x0-1} a ${x1+1}`);
+        }
       }
+
+      // cabezas sueltas
+      if (matrizTablero[y][x] === '<' && (x + 1 >= matrizTablero.length || matrizTablero[y][x + 1] !== '-')){
+        carrosIncompletos.push(`Cabeza '<' sin cuerpo en fila ${y}, columna ${x}`);
+      }
+      if (matrizTablero[y][x] === '>' && (x - 1 < 0 || matrizTablero[y][x - 1] !== '-')){
+        carrosIncompletos.push(`Cabeza '>' sin cuerpo en fila ${y}, columna ${x}`);
+      }
+
+      x++;
     }
 
     // 2) Detectar cabezas sueltas sin cuerpo pegado
@@ -224,7 +251,7 @@ for (let y = 0; y < matrizTablero.length; y++){
   }
 }
 
-  // verticales
+  // --- VERTICALES ---
   for (let x=0; x<largo; x++){
     let y=0;
     while(y<largo){
@@ -338,13 +365,21 @@ function obtenerCarrosDesdeCelda(x,y){
   return null;
 }
 
+function normalizarChar(ch){
+  if (ch === 'I') return '|';
+  if (ch === '—' || ch === '–' || ch === '−') return '-';
+  if (ch === '\u00A0') return ' ';
+  return ch;
+}
+
 function confirmarTablero(){
-  // sincroniza DOM->matriz
+  // sincroniza DOM->matriz # document object model 
   document.querySelectorAll('.celda').forEach(celda => {
     const x = parseInt(celda.dataset.x,10);
     const y = parseInt(celda.dataset.y,10);
     const ch = (celda.textContent || '').trim();
-    matrizTablero[y][x] = ('.-<>v^|B'.includes(ch)) ? ch : '.';
+    const norm = normalizarChar(ch);
+    matrizTablero[y][x] = (norm && VALIDOS.has(norm)) ? norm: '.';  // --------------------- AQUI ESTABA EL PROBLEMA !!! --------------------------------------------
   });
 
   // repinta valores normalizados
@@ -376,6 +411,7 @@ function confirmarTablero(){
   if (btnElegirObjetivo) btnElegirObjetivo.disabled = false;
   const btnComenzar = document.getElementById('btnComenzar');
   if (btnComenzar) btnComenzar.disabled = true;
+  actualizarReglaSalida();
 }
 
 function limpiarObjetivoCabeza(){
@@ -391,6 +427,7 @@ function activarModoElegirObjetivo(){
 }
 
 // ---------------------------
+//
 // Modelo y búsqueda (backtracking / A*)
 // ---------------------------
 
@@ -409,23 +446,64 @@ function inferirOrientacionB(m, bx, by){
   return '>';
 }
 
-// Recalcula y fija una salida válida para el tablero actual
-function recomputarSalidaDesdeB(){
+// Orientación real de B leyendo su cuerpo (soporta H y V)
+function orientacionDeB(m, bx, by){
+  if (bx > 0 && m[by][bx - 1] === '-') return '>';
+  if (bx < m.length - 1 && m[by][bx + 1] === '-') return '<';
+  if (by + 1 < m.length && m[by + 1][bx] === '|') return '^';
+  if (by - 1 >= 0      && m[by - 1][bx] === '|') return 'v';
+  if (headCharSeleccionado) return headCharSeleccionado;
+  return '>';
+}
+
+function textoReglaSalida() {
   const b = findB(matrizTablero);
-  if (!b){
-    mensajeError('No existe el carro objetivo B.');
-    return false;
+  if (!b) return null;
+  const h = orientacionDeB(matrizTablero, b.x, b.y);
+  if (h === '>' || h === '<') {
+    return `La salida debe estar en la misma fila que B (fila ${b.y}).`;
+  } else {
+    return `La salida debe estar en la misma columna que B (columna ${b.x}).`;
   }
-  const head = inferirOrientacionB(matrizTablero, b.x, b.y);
-  const n = sizeTablero;
-  const nuevaSalida = (head === '>') ? { x: n - 1, y: b.y } : { x: 0, y: b.y };
-  setPosicionSalida(nuevaSalida);
-  return true;
+}
+
+function actualizarReglaSalida() {
+  const el = document.getElementById('regla-salida');
+  if (!el) return;
+  const t = textoReglaSalida();
+  if (t) el.textContent = t;
 }
 
 function hash(m){ return m.map(r=>r.join('')).join('|'); }
-function esMeta(m, salida){ return m[salida.y][salida.x] === 'B'; }
 
+function esMeta(m, salida){
+  if (!salida) return false;
+  const b = findB(m);
+  if (!b) return false;
+
+  // Caso 1: B ya está en la salida
+  if (b.x === salida.x && b.y === salida.y) return true;
+
+  // Caso 2: camino despejado verticalmente entre B y la salida
+  if (b.x === salida.x){
+    const step = salida.y > b.y ? 1 : -1;
+    for (let y = b.y + step; y !== salida.y + step; y += step){
+      if (m[y][b.x] !== '.') return false;
+    }
+    return true;
+  }
+
+  // Caso 3: camino despejado horizontalmente entre B y la salida
+  if (b.y === salida.y){
+    const step = salida.x > b.x ? 1 : -1;
+    for (let x = b.x + step; x !== salida.x + step; x += step){
+      if (m[b.y][x] !== '.') return false;
+    }
+    return true;
+  }
+
+  return false;
+}
 function generarMovimientos(m){
   const n = m.length;
   const movs = [];
@@ -433,7 +511,60 @@ function generarMovimientos(m){
     for(let x=0;x<n;x++){
       const c = m[y][x];
       if(c==='B' || CABEZAS.has(c)){
-        if(c==='B' || c==='>'){
+
+        // --- Caso especial B: mover según su orientación real ---
+        if (c === 'B'){
+          const h = orientacionDeB(m, x, y);
+          if (h === '>' || h === '<'){
+            const dirSign = (h === '>') ? -1 : +1; // cuerpo al lado contrario
+            const len = longitudCoche(m, x, y, 'H', dirSign);
+            // derecha
+            if(x+1<n && m[y][x+1]==='.')
+              movs.push({ carId:`(${x},${y})`, dir:'der', steps:1, apply:(mm)=>{
+                for(let i=0;i<len;i++){
+                  const px = x - (h==='>'? i : -i);
+                  mm[y][px+1] = (i===0 ? 'B' : '-');
+                  if(i===len-1) mm[y][px] = '.';
+                }
+              }});
+            // izquierda
+            const colaX = (h==='>') ? x-(len-1) : x+(len-1);
+            if(colaX-1>=0 && m[y][colaX-1]==='.')
+              movs.push({ carId:`(${x},${y})`, dir:'izq', steps:1, apply:(mm)=>{
+                for(let i=len-1;i>=0;i--){
+                  const px = x - (h==='>'? i : -i);
+                  mm[y][px-1] = (i===0 ? 'B' : '-');
+                  if(i===len-1) mm[y][px] = '.';
+                }
+              }});
+          } else {
+            // vertical
+            const dirSign = (h === 'v') ? -1 : +1; // cuerpo al lado contrario
+            const len = longitudCoche(m, x, y, 'V', dirSign);
+            // abajo
+            if(y+1<n && m[y+1][x]==='.')
+              movs.push({ carId:`(${x},${y})`, dir:'aba', steps:1, apply:(mm)=>{
+                for(let i=0;i<len;i++){
+                  const py = y - (h==='v'? i : -i);
+                  mm[py+1][x] = (i===0 ? 'B' : '|');
+                  if(i===len-1) mm[py][x] = '.';
+                }
+              }});
+            // arriba
+              if (y-1 >= 0 && m[y-1][x] === '.')
+                movs.push({ carId:`(${x},${y})`, dir:'arr', steps:1, apply:(mm)=>{
+                  for (let i=len-1; i>=0; i--){
+                    const py = y - (h==='v' ? i : -i);  // tu mismo cálculo
+                    mm[py-1][x] = (i===0 ? 'B' : '|');
+                    if (i===len-1) mm[py][x] = '.';
+                  }
+              }});
+          }
+          continue;
+        }
+
+        // --- Resto de cabezas normales ---
+        if(c==='>'){
           const len = longitudCoche(m, x, y, 'H', -1);
           if(x+1<n && m[y][x+1]==='.')
             movs.push({ carId:`(${x},${y})`, dir:'der', steps:1, apply:(mm)=>{
@@ -529,33 +660,44 @@ function longitudCoche(m, hx, hy, tipo, dirSign){
 }
 // ==== A* support (heurística + PQ + A*) ====
 
-// Heurística robusta
+// ==== A* (heurística + PQ + A*) ====
+
 function heuristica(m, salida){
   const b = findB(m);
-  if (!b || !salida) return 0;
+  if(!b || !salida) return 0;
 
-  if (b.y !== salida.y){
-    // defensivo si B no está en la misma fila que la salida
-    return Math.abs(b.x - salida.x) + Math.abs(b.y - salida.y);
-  }
+  const h = orientacionDeB(m, b.x, b.y);
 
-  const step = salida.x >= b.x ? 1 : -1;
-  const dist = Math.abs(salida.x - b.x);
-  let bloqueos = 0;
-  for (let x = b.x + step; x !== salida.x + step; x += step){
-    if (m[b.y][x] !== '.') bloqueos++;
+  if (h === '>' || h === '<'){
+    if (b.y !== salida.y) return Math.abs(b.x - salida.x) + Math.abs(b.y - salida.y);
+
+    const step = (salida.x >= b.x) ? 1 : -1;
+    const dist = Math.abs(salida.x - b.x);
+    let bloqueos = 0;
+    for (let x = b.x + step; x !== salida.x + step; x += step){
+      if (m[b.y][x] !== '.') bloqueos++;
+    }
+    return dist + bloqueos * 2;
+  } else {
+
+    if (b.x !== salida.x) return Math.abs(b.x - salida.x) + Math.abs(b.y - salida.y);
+
+    const step = (salida.y >= b.y) ? 1 : -1;
+    const dist = Math.abs(salida.y - b.y);
+    let bloqueos = 0;
+    for (let y = b.y + step; y !== salida.y + step; y += step){
+      if (m[y][b.x] !== '.') bloqueos++;
+    }
+    return dist + bloqueos * 2;
   }
-  return dist + bloqueos * 2;
 }
 
-// Aplicar movimiento de forma pura sobre un clon
 function aplicarMovimiento(m, move){
   const mm = m.map(r => r.slice());
   move.apply(mm);
   return mm;
 }
 
-// Priority Queue mínima por f
 class PQ {
   constructor(){ this.a = []; }
   push(x){ this.a.push(x); this._up(this.a.length - 1); }
@@ -568,13 +710,14 @@ class PQ {
     return top;
   }
   isEmpty(){ return this.a.length === 0; }
+  
   _up(i){
     const a = this.a;
     while (i > 0){
-      const p = (i - 1) >> 1;
-      if (a[p].f <= a[i].f) break;
-      [a[p], a[i]] = [a[i], a[p]];
-      i = p;
+      const p = (i - 1) >> 1; // indice del padre
+      if (a[p].f <= a[i].f) break; // si el padre es mejor igual que el hijo se queda igual 
+      [a[p], a[i]] = [a[i], a[p]]; // sino se intercambian 
+      i = p; // se termina cuando el padre es menor o igual a la raiz 
     }
   }
   _down(i){
@@ -590,7 +733,6 @@ class PQ {
   }
 }
 
-// A*
 function resolverAStar(m0, salida, limite = 200000){
   const startKey = hash(m0);
   const g = new Map([[startKey, 0]]);
@@ -598,7 +740,7 @@ function resolverAStar(m0, salida, limite = 200000){
   const open = new PQ();
   open.push({ f: heuristica(m0, salida), key: startKey, m: m0 });
 
-  const visit = new Set();
+  const visit = new Set(); // closed
   let explorados = 0;
 
   while(!open.isEmpty()){
@@ -638,6 +780,37 @@ function resolverAStar(m0, salida, limite = 200000){
 
 
 // ---------------------------
+// Backtracking (DFS) compatible con la UI
+// ---------------------------
+function resolverBacktracking(m0, salida, limite = 200000){ // m0 matriz inicial del tablero, salidaCoord, limite para que no se quede en buqle 
+  const startKey = hash(m0); // guardamos el estado inicial para buscar a partir de ese 
+  const visit = new Set([startKey]); // aqui guardamos el conjunto de vistiados para no volver a repetir el mismo movimiento inf
+  const path = []; // empezamos con el camino vacio 
+  let explorados = 0; // para saber cuantos estados exploramos y no pasarnos del limite 
+  let found = false; 
+
+  function dfs(m){
+    if (esMeta(m, salida)) { found = true; return true; } // caso base que si ya puede salir o esta en la salida se termina
+    if (explorados++ > limite) return false; // o si ya pasamos el limite se termina para que no se quede en bucle
+
+    const movs = generarMovimientos(m); // empezamos a generar movimiendos de la matriz original en una copia para no afectar la original
+    for (const mv of movs){ // para cada movimiento 
+      const m2 = aplicarMovimiento(m, mv); // aplicamos el movimiento al clon y creamos el siguiente estado 
+      const k = hash(m2);  // calculamos el ciclo para que no se repita el mismo 
+      if (visit.has(k)) continue; // si ya visitamos un estado, ignorelo 
+      visit.add(k); // para cada estado vistiado lo agregamos al conjunto de estados visitados antes de visitarlo 
+      path.push(mv); // ahora si lo visitamos y lo guardamos en el camino (guardamos en la pila camino)
+      if (dfs(m2)) return true; // si se genero true es porque se encontro la solucion 
+      path.pop(); // y si no dio true, hacemos pop al path actual para que vuelva a iniciar por otro camino 
+    }
+    return false; // si ya recorrimos todo y no llegamos a la solucion es falsa
+  }
+
+  dfs(m0); // iniciamos desde el estado actual 
+  return { moves: found ? path.slice() : null, explored: explorados }; // retornamos el camino retornamos el path con el camino correcto y los estados explorados.
+}
+
+// ---------------------------
 // UI: iniciar, animar, métricass
 // ---------------------------
 function pintarMetricas({elapsedMs, explored, moves}){
@@ -652,9 +825,17 @@ function pintarMetricas({elapsedMs, explored, moves}){
 
 function listarAcciones(moves){
   const cont = document.getElementById('acciones');
-  if(!moves || !moves.length){ cont.innerHTML = `<p>No se encontró solución.</p>`; return; }
+  if (moves === null) { 
+    cont.innerHTML = `<p>No se encontró solución.</p>`; 
+    return; 
+  }
+  if (!moves.length) {
+    cont.innerHTML = `<p>El carro objetivo ya puede salir (0 movimientos).</p>`;
+    return;
+  }
   cont.innerHTML = `<ol>${moves.map(m=>`<li>mover carro ${m.carId} ${m.dir} ${m.steps} paso(s)</li>`).join('')}</ol>`;
 }
+
 
 async function animarSolucion(m, moves){
   const tablero = document.getElementById('tablero');
@@ -684,7 +865,7 @@ function validarBasico(){
     return false;
   }
 
-  let bCount = 0, bPos = null;
+  let bCount = 0;
   for (let y = 0; y < matrizTablero.length; y++){
     for (let x = 0; x < matrizTablero.length; x++){
       const v = matrizTablero[y][x];
@@ -692,7 +873,7 @@ function validarBasico(){
         mensajeError(`Símbolo inválido "${v}" en (${x},${y}).`);
         return false;
       }
-      if (v === 'B'){ bCount++; bPos = {x,y}; }
+      if (v === 'B') bCount++;
     }
   }
   if (bCount !== 1){
@@ -705,16 +886,29 @@ function validarBasico(){
     return false;
   }
 
-  if (salidaCoord.y !== bPos.y){
-    mensajeError(`La salida debe estar en la misma fila que B (fila ${bPos.y}).`);
-    return false;
-  }
-
+  // Solo límites del tablero
   if (salidaCoord.x < 0 || salidaCoord.y < 0 ||
       salidaCoord.x >= matrizTablero.length || salidaCoord.y >= matrizTablero.length){
     mensajeError('Salida inválida.');
     return false;
   }
+
+  // Regla de misma fila/columna según orientación de B
+  const bPos = findB(matrizTablero);
+  if (!bPos) { mensajeError('Debe existir exactamente un carro objetivo (B).'); return false; }
+  const head = orientacionDeB(matrizTablero, bPos.x, bPos.y);
+  if (head === '>' || head === '<') {
+    if (salidaCoord.y !== bPos.y) {
+      mensajeError(`La salida debe estar en la misma fila que B (fila ${bPos.y}).`);
+      return false;
+    }
+  } else {
+    if (salidaCoord.x !== bPos.x) {
+      mensajeError(`La salida debe estar en la misma columna que B (columna ${bPos.x}).`);
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -739,12 +933,15 @@ async function comenzar(){
   pintarMetricas({ elapsedMs: fin-inicio, explored: resultado.explored || 0, moves: resultado.moves });
   listarAcciones(resultado.moves);
 
-  if(resultado.moves && resultado.moves.length){
+if (resultado.moves !== null) {        // [] ó [ ... ] => hay solución
+  if (resultado.moves.length) {
     await animarSolucion(matrizTablero, resultado.moves);
-    mensajeOk('¡Listo!');
-  } else {
-    mensajeError('No hay solución.');
   }
+  mensajeOk('¡Listo!');
+} else {
+  mensajeError('No hay solución.');
+}
+
 
   setEdicion(true);
 }
@@ -802,10 +999,10 @@ document.addEventListener('DOMContentLoaded', () => {
     Matriz(sizeTablero);
     crearTablero(sizeTablero);
     setPosicionSalida(null);
+    headCharSeleccionado = null;
     document.getElementById('metricas').innerHTML='';
     document.getElementById('acciones').innerHTML='';
     document.getElementById('mensajes').innerHTML='';
-    // Importante: no hay txtTablero/txtSalida
     const bEO = document.getElementById('btnElegirObjetivo');
     if (bEO) bEO.disabled = true;
     const bC = document.getElementById('btnComenzar');
