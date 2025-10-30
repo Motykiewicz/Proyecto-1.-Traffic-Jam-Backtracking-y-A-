@@ -238,7 +238,18 @@ function EscanearCarros(){
 
       x++;
     }
+
+    // 2) Detectar cabezas sueltas sin cuerpo pegado
+    if (matrizTablero[y][x] === '<' && (x + 1 >= matrizTablero.length || matrizTablero[y][x + 1] !== '-')){
+      carrosIncompletos.push(`Cabeza '<' sin cuerpo en fila ${y}, columna ${x}`);
+    }
+    if (matrizTablero[y][x] === '>' && (x - 1 < 0 || matrizTablero[y][x - 1] !== '-')){
+      carrosIncompletos.push(`Cabeza '>' sin cuerpo en fila ${y}, columna ${x}`);
+    }
+
+    x++;
   }
+}
 
   // --- VERTICALES ---
   for (let x=0; x<largo; x++){
@@ -368,7 +379,7 @@ function confirmarTablero(){
     const y = parseInt(celda.dataset.y,10);
     const ch = (celda.textContent || '').trim();
     const norm = normalizarChar(ch);
-    matrizTablero[y][x] = (norm && VALIDOS.has(norm)) ? norm: '.';
+    matrizTablero[y][x] = (norm && VALIDOS.has(norm)) ? norm: '.';  // --------------------- AQUI ESTABA EL PROBLEMA !!! --------------------------------------------
   });
 
   // repinta valores normalizados
@@ -415,19 +426,24 @@ function activarModoElegirObjetivo(){
   mensajeOk("Modo elegir objetivo activo. Haga clic en la cabeza del carro objetivo.");
 }
 
-
-
 // ---------------------------
 //
 // Modelo y búsqueda (backtracking / A*)
 // ---------------------------
 
 function clonMatriz(m){ return m.map(r=>r.slice()); }
-
 function findB(m){
   for(let y=0;y<m.length;y++) for(let x=0;x<m.length;x++)
     if(m[y][x]==='B') return {x,y};
   return null;
+}
+// Detecta hacia dónde ve B inspeccionando su cuerpo
+function inferirOrientacionB(m, bx, by){
+  if (bx > 0 && m[by][bx - 1] === '-') return '>';
+  if (bx < m.length - 1 && m[by][bx + 1] === '-') return '<';
+  for (let x = bx - 1; x >= 0; x--) if (m[by][x] === '-') return '>';
+  for (let x = bx + 1; x < m.length; x++) if (m[by][x] === '-') return '<';
+  return '>';
 }
 
 // Orientación real de B leyendo su cuerpo (soporta H y V)
@@ -642,6 +658,7 @@ function longitudCoche(m, hx, hy, tipo, dirSign){
   }
   return Math.max(len, 2);
 }
+// ==== A* support (heurística + PQ + A*) ====
 
 // ==== A* (heurística + PQ + A*) ====
 
@@ -760,6 +777,7 @@ function resolverAStar(m0, salida, limite = 200000){
   }
   return { moves: null, explored: explorados };
 }
+
 
 // ---------------------------
 // Backtracking (DFS) compatible con la UI
@@ -896,6 +914,7 @@ function validarBasico(){
 
 
 async function comenzar(){
+  if (!recomputarSalidaDesdeB()) return;
   if(!validarBasico()) return;
 
   setEdicion(false);
